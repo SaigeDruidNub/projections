@@ -20,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     AzureAD({
       clientId: process.env.MICROSOFT_CLIENT_ID!,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-      tenantId: "common",
+      issuer: `https://login.microsoftonline.com/common/v2.0`,
       authorization: {
         params: {
           scope: "openid profile email",
