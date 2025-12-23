@@ -1,21 +1,62 @@
 @import "tailwindcss";
 
 :root {
+  /* Base colors - Light mode */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000;
+  
+  /* Accent colors from palette */
+  --accent-light-purple: #8b7fb8;
+  --accent-dark-purple: #3d3557;
+  --accent-olive: #6b7a4b;
+  --accent-light-orange: #e89848;
+  --accent-dark-orange: #e55a28;
+  
+  /* Semantic accent usage */
+  --primary: var(--accent-light-purple);
+  --secondary: var(--accent-dark-purple);
+  --success: var(--accent-olive);
+  --warning: var(--accent-light-orange);
+  --danger: var(--accent-dark-orange);
+  
+  /* UI elements */
+  --border: #e5e5e5;
+  --hover: #f5f5f5;
+  --muted: #737373;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  
+  /* Accent colors */
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Base colors - Dark mode */
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #ffffff;
+    
+    /* Slightly adjusted accents for dark mode contrast */
+    --accent-light-purple: #a89bd4;
+    --accent-dark-purple: #5d527a;
+    --accent-olive: #8b9d6a;
+    --accent-light-orange: #f0a860;
+    --accent-dark-orange: #f07850;
+    
+    /* UI elements for dark mode */
+    --border: #2a2a2a;
+    --hover: #1a1a1a;
+    --muted: #a3a3a3;
   }
 }
 
@@ -24,3 +65,23 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Utility classes for accent colors */
+.accent-light-purple { color: var(--accent-light-purple); }
+.accent-dark-purple { color: var(--accent-dark-purple); }
+.accent-olive { color: var(--accent-olive); }
+.accent-light-orange { color: var(--accent-light-orange); }
+.accent-dark-orange { color: var(--accent-dark-orange); }
+
+.bg-accent-light-purple { background-color: var(--accent-light-purple); }
+.bg-accent-dark-purple { background-color: var(--accent-dark-purple); }
+.bg-accent-olive { background-color: var(--accent-olive); }
+.bg-accent-light-orange { background-color: var(--accent-light-orange); }
+.bg-accent-dark-orange { background-color: var(--accent-dark-orange); }
+
+.border-accent-light-purple { border-color: var(--accent-light-purple); }
+.border-accent-dark-purple { border-color: var(--accent-dark-purple); }
+.border-accent-olive { border-color: var(--accent-olive); }
+.border-accent-light-orange { border-color: var(--accent-light-orange); }
+.border-accent-dark-orange { border-color: var(--accent-dark-orange); }
+
