@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  // Add any middleware logic here if needed
+export function proxy(request: NextRequest) {
+  // Add any proxy logic here if needed
   return NextResponse.next();
 }
 
