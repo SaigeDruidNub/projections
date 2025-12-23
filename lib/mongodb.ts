@@ -4,7 +4,9 @@ const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env"
+    "Please define the MONGODB_URI environment variable.\n" +
+      "For local development: Add it to .env.local\n" +
+      "For Vercel: Add it in Project Settings > Environment Variables"
   );
 }
 

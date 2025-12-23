@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import AzureAD from "next-auth/providers/azure-ad";
 import dbConnect from "@/lib/mongodb";
 import { User } from "@/lib/models";
 
@@ -13,6 +14,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           prompt: "consent",
           access_type: "offline",
           response_type: "code",
+        },
+      },
+    }),
+    AzureAD({
+      clientId: process.env.MICROSOFT_CLIENT_ID!,
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
+      tenantId: "common",
+      authorization: {
+        params: {
+          scope: "openid profile email",
         },
       },
     }),
@@ -56,5 +67,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/auth/signin",
     error: "/auth/error",
   },
-  debug: process.env.NODE_ENV === "development",
+  debug: true,
 });
