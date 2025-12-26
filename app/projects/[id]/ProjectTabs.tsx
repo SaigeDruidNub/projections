@@ -31,6 +31,20 @@ export default function ProjectTabs({
     [key: string]: any[];
   }>({});
 
+  // Email projection state
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [emailProjectionId, setEmailProjectionId] = useState<string | null>(
+    null
+  );
+  const [emailSelectedUsers, setEmailSelectedUsers] = useState<string[]>([]);
+  const [emailMessage, setEmailMessage] = useState("");
+  const [emailHistory, setEmailHistory] = useState<{ [key: string]: any[] }>(
+    {}
+  );
+  const [showEmailHistory, setShowEmailHistory] = useState<{
+    [key: string]: boolean;
+  }>({});
+
   // Projection form
   const [projectionName, setProjectionName] = useState("");
   const [csvData, setCsvData] = useState<any[]>([]);
@@ -104,6 +118,80 @@ export default function ProjectTabs({
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+  };
+
+  const handleEmailProjection = async () => {
+    if (!emailProjectionId || emailSelectedUsers.length === 0) {
+      alert("Please select at least one user to email");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/projections/${emailProjectionId}/email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userIds: emailSelectedUsers,
+          message: emailMessage,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert(data.message);
+        setShowEmailDialog(false);
+        setEmailProjectionId(null);
+        setEmailSelectedUsers([]);
+        setEmailMessage("");
+        // Refresh email history for this projection
+        loadEmailHistory(emailProjectionId);
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("Failed to send email");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadEmailHistory = async (projectionId: string) => {
+    try {
+      const res = await fetch(`/api/projections/${projectionId}/emails`);
+      if (res.ok) {
+        const data = await res.json();
+        setEmailHistory((prev) => ({ ...prev, [projectionId]: data }));
+      }
+    } catch (error) {
+      console.error("Error loading email history:", error);
+    }
+  };
+
+  const toggleEmailHistory = (projectionId: string) => {
+    setShowEmailHistory((prev) => ({
+      ...prev,
+      [projectionId]: !prev[projectionId],
+    }));
+    // Load history if not already loaded
+    if (!emailHistory[projectionId]) {
+      loadEmailHistory(projectionId);
+    }
+  };
+
+  const openEmailDialog = (projectionId: string) => {
+    setEmailProjectionId(projectionId);
+    setShowEmailDialog(true);
+  };
+
+  const toggleEmailUser = (userId: string) => {
+    setEmailSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
   };
 
   // Feature form
@@ -1405,12 +1493,20 @@ export default function ProjectTabs({
                               </p>
                             )}
                           </div>
-                          <button
-                            onClick={downloadCsv}
-                            className="rounded-md bg-accent-light-purple px-3 py-1 text-xs font-medium text-white hover:bg-accent-dark-orange transition-colors"
-                          >
-                            Download CSV
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => openEmailDialog(proj._id)}
+                              className="rounded-md bg-accent-olive px-3 py-1 text-xs font-medium text-white hover:bg-accent-dark-orange transition-colors"
+                            >
+                              📧 Email
+                            </button>
+                            <button
+                              onClick={downloadCsv}
+                              className="rounded-md bg-accent-light-purple px-3 py-1 text-xs font-medium text-white hover:bg-accent-dark-orange transition-colors"
+                            >
+                              Download CSV
+                            </button>
+                          </div>
                         </div>
                         <p className="text-sm text-black dark:text-white opacity-70">
                           {proj.rowCount || data.length} rows ×{" "}
@@ -1505,6 +1601,91 @@ export default function ProjectTabs({
                             )}
                           </div>
                         )}
+
+                        {/* Email History Section */}
+                        <div className="mt-4 border-t border-accent-olive pt-4">
+                          <button
+                            onClick={() => toggleEmailHistory(proj._id)}
+                            className="text-sm text-accent-light-purple hover:text-accent-dark-orange font-medium flex items-center gap-2"
+                          >
+                            {showEmailHistory[proj._id] ? "▼" : "▶"} Email
+                            History
+                            {emailHistory[proj._id] &&
+                              emailHistory[proj._id].length > 0 && (
+                                <span className="bg-accent-olive text-white text-xs px-2 py-0.5 rounded-full">
+                                  {emailHistory[proj._id].length}
+                                </span>
+                              )}
+                          </button>
+
+                          {showEmailHistory[proj._id] && (
+                            <div className="mt-3 space-y-2">
+                              {!emailHistory[proj._id] ? (
+                                <p className="text-sm text-black dark:text-white opacity-60">
+                                  Loading...
+                                </p>
+                              ) : emailHistory[proj._id].length === 0 ? (
+                                <p className="text-sm text-black dark:text-white opacity-60">
+                                  No emails sent yet
+                                </p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {emailHistory[proj._id].map(
+                                    (email: any, idx: number) => (
+                                      <div
+                                        key={idx}
+                                        className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded border border-accent-olive"
+                                      >
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2">
+                                            <span
+                                              className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                                                email.emailStatus === "sent"
+                                                  ? "bg-accent-olive text-white"
+                                                  : "bg-red-500 text-white"
+                                              }`}
+                                            >
+                                              {email.emailStatus === "sent"
+                                                ? "✓ Sent"
+                                                : "✗ Failed"}
+                                            </span>
+                                            <span className="text-sm font-medium text-black dark:text-white">
+                                              {email.recipientName ||
+                                                email.recipientEmail}
+                                            </span>
+                                          </div>
+                                          {email.recipientName && (
+                                            <p className="text-xs text-black dark:text-white opacity-60 mt-1">
+                                              {email.recipientEmail}
+                                            </p>
+                                          )}
+                                          <p className="text-xs text-black dark:text-white opacity-60 mt-1">
+                                            Sent by {email.sentByName || email.sentByEmail}
+                                          </p>
+                                          {email.message && (
+                                            <p className="text-xs text-black dark:text-white opacity-70 mt-2 italic">
+                                              "{email.message}"
+                                            </p>
+                                          )}
+                                          {email.errorMessage && (
+                                            <p className="text-xs text-red-500 mt-1">
+                                              Error: {email.errorMessage}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <span className="text-xs text-black dark:text-white opacity-60 whitespace-nowrap ml-4">
+                                          {new Date(
+                                            email.createdAt
+                                          ).toLocaleString()}
+                                        </span>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -1862,6 +2043,109 @@ export default function ProjectTabs({
           </div>
         )}
       </div>
+
+      {/* Email Projection Dialog */}
+      {showEmailDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-black rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-accent-olive">
+            <div className="p-6 border-b border-accent-olive">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-black dark:text-white">
+                  📧 Email Projection
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowEmailDialog(false);
+                    setEmailProjectionId(null);
+                    setEmailSelectedUsers([]);
+                    setEmailMessage("");
+                  }}
+                  className="text-black dark:text-white hover:text-accent-dark-orange text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                  Select Users to Email
+                </label>
+                {users.length === 0 ? (
+                  <p className="text-sm text-black dark:text-white opacity-60">
+                    No users available
+                  </p>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto border border-accent-olive rounded-md p-3">
+                    {users.map((user: any) => (
+                      <label
+                        key={user._id}
+                        className="flex items-center space-x-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={emailSelectedUsers.includes(user._id)}
+                          onChange={() => toggleEmailUser(user._id)}
+                          className="h-4 w-4 rounded border-accent-olive text-accent-olive focus:ring-accent-light-purple"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-black dark:text-white">
+                            {user.name || user.email}
+                          </p>
+                          {user.name && (
+                            <p className="text-xs text-black dark:text-white opacity-60">
+                              {user.email}
+                            </p>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                <p className="mt-2 text-xs text-black dark:text-white opacity-70">
+                  {emailSelectedUsers.length} user(s) selected
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                  Optional Message
+                </label>
+                <textarea
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  rows={4}
+                  placeholder="Add a message to include in the email (optional)"
+                  className="w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-accent-olive flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowEmailDialog(false);
+                  setEmailProjectionId(null);
+                  setEmailSelectedUsers([]);
+                  setEmailMessage("");
+                }}
+                disabled={loading}
+                className="px-4 py-2 rounded-md border border-accent-olive text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEmailProjection}
+                disabled={loading || emailSelectedUsers.length === 0}
+                className="px-4 py-2 rounded-md bg-accent-olive text-white hover:bg-accent-dark-orange disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? "Sending..." : "Send Email"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -8,6 +8,7 @@ export { Feature } from "./Feature";
 export { FeatureApproval } from "./FeatureApproval";
 export { ProjectionApproval } from "./ProjectionApproval";
 export { Notification } from "./Notification";
+export { ProjectionEmail } from "./ProjectionEmail";
 
 export type { IUser } from "./User";
 export type { IProject } from "./Project";
@@ -18,4 +19,5 @@ export type { IApproval } from "./Approval";
 export type { IFeature } from "./Feature";
 export type { IFeatureApproval } from "./FeatureApproval";
 export type { IProjectionApproval } from "./ProjectionApproval";
+export type { IProjectionEmail } from "./ProjectionEmail";
 export type { INotification } from "./Notification";
