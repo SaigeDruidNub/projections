@@ -26,10 +26,10 @@ const ProjectionEmailSchema = new Schema<IProjectionEmail>(
     sentByEmail: { type: String, required: true },
     sentByName: { type: String },
     message: { type: String },
-    emailStatus: { 
-      type: String, 
-      enum: ["sent", "failed"], 
-      default: "sent" 
+    emailStatus: {
+      type: String,
+      enum: ["sent", "failed"],
+      default: "sent",
     },
     errorMessage: { type: String },
   },
@@ -42,4 +42,5 @@ ProjectionEmailSchema.index({ projectionId: 1, createdAt: -1 });
 ProjectionEmailSchema.index({ recipientId: 1 });
 
 export const ProjectionEmail =
-  models.ProjectionEmail || model<IProjectionEmail>("ProjectionEmail", ProjectionEmailSchema);
+  models.ProjectionEmail ||
+  model<IProjectionEmail>("ProjectionEmail", ProjectionEmailSchema);

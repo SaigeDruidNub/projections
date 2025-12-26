@@ -1660,7 +1660,9 @@ export default function ProjectTabs({
                                             </p>
                                           )}
                                           <p className="text-xs text-black dark:text-white opacity-60 mt-1">
-                                            Sent by {email.sentByName || email.sentByEmail}
+                                            Sent by{" "}
+                                            {email.sentByName ||
+                                              email.sentByEmail}
                                           </p>
                                           {email.message && (
                                             <p className="text-xs text-black dark:text-white opacity-70 mt-2 italic">

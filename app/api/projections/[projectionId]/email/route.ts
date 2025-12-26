@@ -71,7 +71,10 @@ export async function POST(
     const csvFilename = projection.filename || `${projection.name}.csv`;
 
     // Track successful and failed sends
-    const emailResults: { success: number; failed: number } = { success: 0, failed: 0 };
+    const emailResults: { success: number; failed: number } = {
+      success: 0,
+      failed: 0,
+    };
 
     // Send email to each recipient
     const emailPromises = recipients.map(async (recipient) => {
@@ -114,7 +117,7 @@ export async function POST(
         emailResults.success++;
       } catch (error: any) {
         console.error(`Failed to send email to ${recipient.email}:`, error);
-        
+
         // Record failed email send
         await ProjectionEmail.create({
           projectionId: projection._id,

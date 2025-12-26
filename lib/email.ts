@@ -33,7 +33,12 @@ const createTransporter = () => {
   });
 };
 
-export async function sendEmail({ to, subject, html, attachments }: EmailParams) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  attachments,
+}: EmailParams) {
   const transporter = createTransporter();
 
   // If no transporter (credentials not set), just log
@@ -43,7 +48,10 @@ export async function sendEmail({ to, subject, html, attachments }: EmailParams)
     console.log("Subject:", subject);
     console.log("Body preview:", html.substring(0, 200) + "...");
     if (attachments && attachments.length > 0) {
-      console.log("Attachments:", attachments.map(a => a.filename).join(", "));
+      console.log(
+        "Attachments:",
+        attachments.map((a) => a.filename).join(", ")
+      );
     }
     return { success: true, mode: "development" };
   }
