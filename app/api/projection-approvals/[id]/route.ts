@@ -44,6 +44,7 @@ export async function PATCH(
       );
     }
 
+    // Allow users to change their response at any time
     // Update the approval
     const updateData: any = {
       status,

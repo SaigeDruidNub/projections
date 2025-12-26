@@ -8,6 +8,7 @@ export interface IProjectionApproval {
   comment?: string;
   approvedAt?: Date;
   rejectedAt?: Date;
+  requestNumber: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,16 +25,15 @@ const ProjectionApprovalSchema = new Schema<IProjectionApproval>(
     comment: { type: String },
     approvedAt: { type: Date },
     rejectedAt: { type: Date },
+    requestNumber: { type: Number, default: 1 },
   },
   {
     timestamps: true,
   }
 );
 
-ProjectionApprovalSchema.index(
-  { projectionId: 1, userId: 1 },
-  { unique: true }
-);
+// Index for querying, but not unique to allow multiple approval rounds
+ProjectionApprovalSchema.index({ projectionId: 1, userId: 1 });
 
 export const ProjectionApproval =
   models.ProjectionApproval ||

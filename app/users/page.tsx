@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import Header from "@/app/components/Header";
 import dbConnect from "@/lib/mongodb";
 import { User } from "@/lib/models";
 
@@ -42,21 +42,7 @@ export default async function UsersPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
-      <nav className="bg-white dark:bg-black shadow-sm border-b-2 border-accent-olive">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link
-              href="/dashboard"
-              className="text-sm text-accent-light-purple dark:text-accent-light-purple hover:text-accent-dark-orange dark:hover:text-accent-dark-orange"
-            >
-              ← Dashboard
-            </Link>
-            <span className="text-sm text-black dark:text-white">
-              {session.user.name}
-            </span>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">

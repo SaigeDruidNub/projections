@@ -874,7 +874,13 @@ export default function ProjectTabs({
         setSelectedUsers([]);
         loadApprovals(selectedProjection);
       } else {
-        alert("Failed to request approvals");
+        const errorData = await res
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
+        console.error("API Error:", errorData);
+        alert(
+          `Failed to request approvals: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       console.error("Error requesting approvals:", error);
@@ -1634,7 +1640,7 @@ export default function ProjectTabs({
                                     (email: any, idx: number) => (
                                       <div
                                         key={idx}
-                                        className="flex items-start justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded border border-accent-olive"
+                                        className="flex items-start justify-between p-3 bg-black dark:bg-black rounded border border-accent-olive"
                                       >
                                         <div className="flex-1">
                                           <div className="flex items-center gap-2">
@@ -1827,120 +1833,180 @@ export default function ProjectTabs({
                             No approval requests yet
                           </p>
                         ) : (
-                          <div className="space-y-3">
-                            {approvals
-                              .sort((a: any, b: any) => {
-                                // Sort: pending first, then by date
-                                if (
-                                  a.status === "pending" &&
-                                  b.status !== "pending"
-                                )
-                                  return -1;
-                                if (
-                                  a.status !== "pending" &&
-                                  b.status === "pending"
-                                )
-                                  return 1;
-                                const aDate =
-                                  a.approvedAt || a.rejectedAt || a.createdAt;
-                                const bDate =
-                                  b.approvedAt || b.rejectedAt || b.createdAt;
+                          <div className="space-y-4">
+                            {(() => {
+                              // Group approvals by request number
+                              const groupedApprovals = approvals.reduce(
+                                (acc: any, approval: any) => {
+                                  const reqNum = approval.requestNumber || 1;
+                                  if (!acc[reqNum]) acc[reqNum] = [];
+                                  acc[reqNum].push(approval);
+                                  return acc;
+                                },
+                                {}
+                              );
+
+                              // Sort request numbers descending (latest first)
+                              const sortedRequestNumbers = Object.keys(
+                                groupedApprovals
+                              )
+                                .map(Number)
+                                .sort((a, b) => b - a);
+
+                              return sortedRequestNumbers.map((reqNum) => {
+                                const requestApprovals =
+                                  groupedApprovals[reqNum];
                                 return (
-                                  new Date(bDate).getTime() -
-                                  new Date(aDate).getTime()
-                                );
-                              })
-                              .map((approval: any) => (
-                                <div
-                                  key={approval._id}
-                                  className="flex items-center justify-between p-3 rounded border border-accent-olive"
-                                >
-                                  <div className="flex items-center space-x-3 flex-1">
-                                    {approval.user?.image && (
-                                      <img
-                                        src={approval.user.image}
-                                        alt={approval.user.name}
-                                        className="w-8 h-8 rounded-full"
-                                      />
-                                    )}
-                                    <div className="flex-1">
-                                      <p className="font-medium text-sm text-black dark:text-white">
-                                        {approval.user?.name ||
-                                          approval.user?.email ||
-                                          "Unknown User"}
-                                      </p>
-                                      {approval.comment && (
-                                        <p className="text-xs text-black dark:text-white opacity-70">
-                                          {approval.comment}
-                                        </p>
+                                  <div
+                                    key={reqNum}
+                                    className="border-2 border-accent-olive rounded-lg p-3"
+                                  >
+                                    <h5 className="text-sm font-semibold text-accent-light-purple mb-2">
+                                      Request #{reqNum}
+                                      {reqNum ===
+                                        Math.max(...sortedRequestNumbers) && (
+                                        <span className="ml-2 text-xs bg-accent-light-orange text-white px-2 py-0.5 rounded-full">
+                                          Latest
+                                        </span>
                                       )}
-                                      <p className="text-xs text-black dark:text-white opacity-60 mt-1">
-                                        {approval.status === "approved" &&
-                                        approval.approvedAt
-                                          ? `Approved ${new Date(
-                                              approval.approvedAt
-                                            ).toLocaleString()}`
-                                          : approval.status === "rejected" &&
-                                            approval.rejectedAt
-                                          ? `Rejected ${new Date(
-                                              approval.rejectedAt
-                                            ).toLocaleString()}`
-                                          : `Requested ${new Date(
-                                              approval.createdAt
-                                            ).toLocaleString()}`}
-                                      </p>
+                                    </h5>
+                                    <div className="space-y-2">
+                                      {requestApprovals
+                                        .sort((a: any, b: any) => {
+                                          // Sort: pending first, then by date
+                                          if (
+                                            a.status === "pending" &&
+                                            b.status !== "pending"
+                                          )
+                                            return -1;
+                                          if (
+                                            a.status !== "pending" &&
+                                            b.status === "pending"
+                                          )
+                                            return 1;
+                                          const aDate =
+                                            a.approvedAt ||
+                                            a.rejectedAt ||
+                                            a.createdAt;
+                                          const bDate =
+                                            b.approvedAt ||
+                                            b.rejectedAt ||
+                                            b.createdAt;
+                                          return (
+                                            new Date(bDate).getTime() -
+                                            new Date(aDate).getTime()
+                                          );
+                                        })
+                                        .map((approval: any) => (
+                                          <div
+                                            key={approval._id}
+                                            className="flex items-center justify-between p-2 rounded border border-accent-olive bg-white dark:bg-black"
+                                          >
+                                            <div className="flex items-center space-x-3 flex-1">
+                                              {approval.user?.image && (
+                                                <img
+                                                  src={approval.user.image}
+                                                  alt={approval.user.name}
+                                                  className="w-7 h-7 rounded-full"
+                                                />
+                                              )}
+                                              <div className="flex-1">
+                                                <p className="font-medium text-xs text-black dark:text-white">
+                                                  {approval.user?.name ||
+                                                    approval.user?.email ||
+                                                    "Unknown User"}
+                                                </p>
+                                                {approval.comment && (
+                                                  <p className="text-xs text-black dark:text-white opacity-70">
+                                                    {approval.comment}
+                                                  </p>
+                                                )}
+                                                <p className="text-xs text-black dark:text-white opacity-60 mt-1">
+                                                  {approval.status ===
+                                                    "approved" &&
+                                                  approval.approvedAt
+                                                    ? `Approved ${new Date(
+                                                        approval.approvedAt
+                                                      ).toLocaleString()}`
+                                                    : approval.status ===
+                                                        "rejected" &&
+                                                      approval.rejectedAt
+                                                    ? `Rejected ${new Date(
+                                                        approval.rejectedAt
+                                                      ).toLocaleString()}`
+                                                    : `Requested ${new Date(
+                                                        approval.createdAt
+                                                      ).toLocaleString()}`}
+                                                </p>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              {approval.userId ===
+                                              currentUserId ? (
+                                                <>
+                                                  <button
+                                                    onClick={() =>
+                                                      handleApprovalAction(
+                                                        approval._id,
+                                                        "approved",
+                                                        proj._id
+                                                      )
+                                                    }
+                                                    disabled={loading}
+                                                    className={`px-2 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 ${
+                                                      approval.status ===
+                                                      "approved"
+                                                        ? "bg-accent-olive text-white"
+                                                        : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-accent-olive hover:text-white"
+                                                    }`}
+                                                  >
+                                                    ✓ Approve
+                                                  </button>
+                                                  <button
+                                                    onClick={() =>
+                                                      handleApprovalAction(
+                                                        approval._id,
+                                                        "rejected",
+                                                        proj._id
+                                                      )
+                                                    }
+                                                    disabled={loading}
+                                                    className={`px-2 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 ${
+                                                      approval.status ===
+                                                      "rejected"
+                                                        ? "bg-red-500 text-white"
+                                                        : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-red-500 hover:text-white"
+                                                    }`}
+                                                  >
+                                                    ✗ Reject
+                                                  </button>
+                                                </>
+                                              ) : (
+                                                <span
+                                                  className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                                                    approval.status ===
+                                                    "approved"
+                                                      ? "bg-accent-olive text-white"
+                                                      : approval.status ===
+                                                        "rejected"
+                                                      ? "bg-red-500 text-white"
+                                                      : "bg-accent-light-orange text-white"
+                                                  }`}
+                                                >
+                                                  {approval.status
+                                                    .charAt(0)
+                                                    .toUpperCase() +
+                                                    approval.status.slice(1)}
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    {approval.userId === currentUserId &&
-                                    approval.status === "pending" ? (
-                                      <>
-                                        <button
-                                          onClick={() =>
-                                            handleApprovalAction(
-                                              approval._id,
-                                              "approved",
-                                              proj._id
-                                            )
-                                          }
-                                          disabled={loading}
-                                          className="px-3 py-1 rounded-full text-xs font-semibold bg-accent-olive text-white hover:bg-opacity-80 disabled:opacity-50 transition-colors"
-                                        >
-                                          ✓ Approve
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            handleApprovalAction(
-                                              approval._id,
-                                              "rejected",
-                                              proj._id
-                                            )
-                                          }
-                                          disabled={loading}
-                                          className="px-3 py-1 rounded-full text-xs font-semibold bg-red-500 text-white hover:bg-opacity-80 disabled:opacity-50 transition-colors"
-                                        >
-                                          ✗ Reject
-                                        </button>
-                                      </>
-                                    ) : (
-                                      <span
-                                        className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                                          approval.status === "approved"
-                                            ? "bg-accent-olive text-white"
-                                            : approval.status === "rejected"
-                                            ? "bg-red-500 text-white"
-                                            : "bg-accent-light-orange text-white"
-                                        }`}
-                                      >
-                                        {approval.status
-                                          .charAt(0)
-                                          .toUpperCase() +
-                                          approval.status.slice(1)}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
+                                );
+                              });
+                            })()}
                           </div>
                         )}
                       </div>

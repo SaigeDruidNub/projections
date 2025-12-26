@@ -41,15 +41,6 @@ export default function NewProject() {
   return (
     <div className="min-h-screen bg-white dark:bg-black py-12">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <Link
-            href="/dashboard"
-            className="text-sm text-accent-light-purple hover:text-accent-dark-orange transition-colors"
-          >
-            ← Back to Dashboard
-          </Link>
-        </div>
-
         <div className="rounded-lg bg-white dark:bg-black p-8 shadow-lg border-2 border-accent-olive">
           <h1 className="mb-6 text-2xl font-bold text-black dark:text-white">
             Create New Project

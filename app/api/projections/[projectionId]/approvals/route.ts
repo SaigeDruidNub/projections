@@ -88,23 +88,36 @@ export async function POST(
     const project = await Project.findById(projection.projectId);
     const projectName = project?.name || "Unknown Project";
 
-    // Create approval requests for each user
-    const approvalPromises = userIds.map((userId: string) =>
-      ProjectionApproval.findOneAndUpdate(
-        { projectionId, userId },
-        { projectionId, userId, status: "pending" },
-        { upsert: true, new: true }
+    // Find the highest request number for this projection
+    const latestApprovals = await ProjectionApproval.find({ projectionId })
+      .sort({ requestNumber: -1 })
+      .limit(1);
+
+    const nextRequestNumber =
+      latestApprovals.length > 0 && latestApprovals[0].requestNumber
+        ? latestApprovals[0].requestNumber + 1
+        : 1;
+
+    // Create new approval requests for all specified users with the new request number
+    const newApprovals = await Promise.all(
+      userIds.map((userId: string) =>
+        ProjectionApproval.create({
+          projectionId,
+          userId,
+          status: "pending",
+          requestNumber: nextRequestNumber,
+        })
       )
     );
 
-    const approvals = await Promise.all(approvalPromises);
+    const approvals = newApprovals;
 
     // Get user details for notifications
     const users = await User.find({ _id: { $in: userIds } }).select(
       "name email"
     );
 
-    // Send notifications to each user
+    // Send notifications to all users for this new approval request
     const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const approvalLink = `${baseUrl}/projects/${projection.projectId}?tab=approvals&projection=${projectionId}`;
 

@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import ProjectTabs from "./ProjectTabs";
-import NotificationBell from "@/app/components/NotificationBell";
 
 async function getProjectData(id: string) {
   // Import models directly to avoid fetch timing issues
@@ -66,23 +65,6 @@ export default async function ProjectPage({
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
-      <nav className="bg-accent-light-purple border-b-4 border-accent-dark-orange shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link
-              href="/dashboard"
-              className="text-sm text-white hover:text-accent-light-orange transition-colors"
-            >
-              ← Dashboard
-            </Link>
-            <div className="flex items-center space-x-4">
-              <NotificationBell />
-              <span className="text-sm text-white">{session.user.name}</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-black dark:text-white">
