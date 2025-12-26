@@ -35,6 +35,48 @@ export default function ProjectTabs({
   const [projectionName, setProjectionName] = useState("");
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvFilename, setCsvFilename] = useState("");
+  const [creationMode, setCreationMode] = useState<"upload" | "hourly">(
+    "upload"
+  );
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [templateRows, setTemplateRows] = useState<any[][]>([]);
+
+  // Hourly projection form state
+  const [hourlyForm, setHourlyForm] = useState({
+    vendor: "",
+    month: "",
+    commsRate: "",
+    engineeringRate: "",
+    bugFixesRate: "",
+    appTestingRate: "",
+  });
+
+  // Change to array of weeks instead of fixed object
+  const [weeks, setWeeks] = useState<string[]>([
+    "Week 1",
+    "Week 2",
+    "Week 3",
+    "Week 4",
+  ]);
+
+  const [weeklyProjects, setWeeklyProjects] = useState<{
+    [key: string]: Array<{
+      name: string;
+      objectives: Array<{
+        description: string;
+        comms: string;
+        engineering: string;
+        bugFixes: string;
+        appTesting: string;
+      }>;
+    }>;
+  }>({
+    "Week 1": [],
+    "Week 2": [],
+    "Week 3": [],
+    "Week 4": [],
+  });
+  const [assumptions, setAssumptions] = useState<string[]>([""]);
 
   // Load users on mount
   useEffect(() => {
@@ -69,6 +111,597 @@ export default function ProjectTabs({
     name: "",
     description: "",
   });
+
+  // Template definitions
+  const templates = {
+    financial: {
+      name: "Financial Projection",
+      headers: ["Month", "Revenue", "Expenses", "Net Income", "Cash Flow"],
+      defaultRows: 12,
+      exampleRow: ["January 2024", "50000", "30000", "20000", "20000"],
+    },
+    timeline: {
+      name: "Project Timeline",
+      headers: ["Milestone", "Start Date", "End Date", "Owner", "Status"],
+      defaultRows: 5,
+      exampleRow: [
+        "Phase 1 Planning",
+        "2024-01-01",
+        "2024-01-31",
+        "Team Lead",
+        "In Progress",
+      ],
+    },
+    resources: {
+      name: "Resource Allocation",
+      headers: [
+        "Resource Name",
+        "Role",
+        "Hours/Week",
+        "Cost/Hour",
+        "Total Cost",
+      ],
+      defaultRows: 8,
+      exampleRow: ["John Doe", "Developer", "40", "75", "3000"],
+    },
+    metrics: {
+      name: "Performance Metrics",
+      headers: ["Metric", "Target", "Actual", "Variance", "Notes"],
+      defaultRows: 10,
+      exampleRow: ["User Signups", "1000", "850", "-15%", "Below target"],
+    },
+    inventory: {
+      name: "Inventory Tracking",
+      headers: [
+        "Item",
+        "SKU",
+        "Quantity",
+        "Unit Price",
+        "Total Value",
+        "Location",
+      ],
+      defaultRows: 15,
+      exampleRow: [
+        "Widget A",
+        "WDG-001",
+        "100",
+        "25.00",
+        "2500",
+        "Warehouse 1",
+      ],
+    },
+  };
+
+  const handleTemplateSelect = (templateKey: string) => {
+    setSelectedTemplate(templateKey);
+    if (templateKey && templates[templateKey as keyof typeof templates]) {
+      const template = templates[templateKey as keyof typeof templates];
+      // Initialize with headers and one example row
+      const initialRows = [template.headers, template.exampleRow];
+      setTemplateRows(initialRows);
+      setCsvData(initialRows);
+      setProjectionName(template.name);
+    }
+  };
+
+  const handleAddTemplateRow = () => {
+    if (!selectedTemplate) return;
+    const template = templates[selectedTemplate as keyof typeof templates];
+    const emptyRow = new Array(template.headers.length).fill("");
+    setTemplateRows([...templateRows, emptyRow]);
+  };
+
+  const handleRemoveTemplateRow = (index: number) => {
+    if (index === 0) return; // Don't remove header
+    const newRows = templateRows.filter((_, i) => i !== index);
+    setTemplateRows(newRows);
+    setCsvData(newRows);
+  };
+
+  const handleTemplateFieldChange = (
+    rowIndex: number,
+    colIndex: number,
+    value: string
+  ) => {
+    const newRows = [...templateRows];
+    newRows[rowIndex][colIndex] = value;
+    setTemplateRows(newRows);
+    setCsvData(newRows);
+  };
+
+  // Hourly Projection Handlers
+  const addProjectToWeek = (week: string) => {
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: [
+        ...weeklyProjects[week],
+        {
+          name: "",
+          objectives: [
+            {
+              description: "",
+              comms: "",
+              engineering: "",
+              bugFixes: "",
+              appTesting: "",
+            },
+          ],
+        },
+      ],
+    });
+  };
+
+  const removeProjectFromWeek = (week: string, index: number) => {
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: weeklyProjects[week].filter((_, i) => i !== index),
+    });
+  };
+
+  const updateWeeklyProject = (
+    week: string,
+    index: number,
+    field: string,
+    value: string
+  ) => {
+    const updated = [...weeklyProjects[week]];
+    updated[index] = { ...updated[index], [field]: value };
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  // Add week handlers
+  const addWeek = () => {
+    const newWeekNumber = weeks.length + 1;
+    const newWeekName = `Week ${newWeekNumber}`;
+    setWeeks([...weeks, newWeekName]);
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [newWeekName]: [],
+    });
+  };
+
+  const removeWeek = (weekName: string) => {
+    if (weeks.length <= 1) {
+      alert("Must have at least one week");
+      return;
+    }
+    setWeeks(weeks.filter((w) => w !== weekName));
+    const newWeeklyProjects = { ...weeklyProjects };
+    delete newWeeklyProjects[weekName];
+    setWeeklyProjects(newWeeklyProjects);
+  };
+
+  // New handlers for objectives
+  const addObjectiveToProject = (week: string, projectIndex: number) => {
+    const updated = [...weeklyProjects[week]];
+    updated[projectIndex].objectives.push({
+      description: "",
+      comms: "",
+      engineering: "",
+      bugFixes: "",
+      appTesting: "",
+    });
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  const removeObjectiveFromProject = (
+    week: string,
+    projectIndex: number,
+    objectiveIndex: number
+  ) => {
+    const updated = [...weeklyProjects[week]];
+    updated[projectIndex].objectives = updated[projectIndex].objectives.filter(
+      (_, i) => i !== objectiveIndex
+    );
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  const updateProjectObjective = (
+    week: string,
+    projectIndex: number,
+    objectiveIndex: number,
+    field: string,
+    value: string
+  ) => {
+    const updated = [...weeklyProjects[week]];
+    updated[projectIndex].objectives[objectiveIndex] = {
+      ...updated[projectIndex].objectives[objectiveIndex],
+      [field]: value,
+    };
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  // Assumption handlers
+  const addAssumption = () => {
+    setAssumptions([...assumptions, ""]);
+  };
+
+  const removeAssumption = (index: number) => {
+    if (assumptions.length <= 1) {
+      alert("Must have at least one assumption");
+      return;
+    }
+    setAssumptions(assumptions.filter((_, i) => i !== index));
+  };
+
+  const updateAssumption = (index: number, value: string) => {
+    const updated = [...assumptions];
+    updated[index] = value;
+    setAssumptions(updated);
+  };
+
+  const calculateWeekTotals = (week: string) => {
+    const projects = weeklyProjects[week];
+    let totals = {
+      comms: 0,
+      engineering: 0,
+      bugFixes: 0,
+      appTesting: 0,
+    };
+
+    projects.forEach((project) => {
+      project.objectives.forEach((objective) => {
+        totals.comms += parseFloat(objective.comms) || 0;
+        totals.engineering += parseFloat(objective.engineering) || 0;
+        totals.bugFixes += parseFloat(objective.bugFixes) || 0;
+        totals.appTesting += parseFloat(objective.appTesting) || 0;
+      });
+    });
+
+    return totals;
+  };
+
+  const generateHourlyProjectionCSV = () => {
+    const csvRows: any[][] = [];
+
+    // Header section
+    csvRows.push([
+      "",
+      "Vendor:",
+      hourlyForm.vendor,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([
+      "",
+      "Month:",
+      hourlyForm.month,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([]);
+    csvRows.push([]);
+    csvRows.push([]);
+
+    // Summary section - calculate totals for all weeks dynamically
+    const weekTotals = weeks.map((week) => calculateWeekTotals(week));
+
+    const monthlyTotals = {
+      comms: weekTotals.reduce((sum, wt) => sum + wt.comms, 0),
+      engineering: weekTotals.reduce((sum, wt) => sum + wt.engineering, 0),
+      bugFixes: weekTotals.reduce((sum, wt) => sum + wt.bugFixes, 0),
+      appTesting: weekTotals.reduce((sum, wt) => sum + wt.appTesting, 0),
+    };
+
+    csvRows.push([
+      "",
+      "Type",
+      "Projected Hours Per Week",
+      ...weeks.map(() => ""),
+      "PROJECTED TOTAL HRS",
+      "Hourly ($)",
+      "Total ($)",
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([
+      "",
+      "COMMS",
+      ...weeks.map((w) => w.toUpperCase()),
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([
+      "",
+      "COMMS",
+      ...weekTotals.map((wt) => wt.comms),
+      monthlyTotals.comms,
+      hourlyForm.commsRate,
+      monthlyTotals.comms * (parseFloat(hourlyForm.commsRate) || 0),
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([
+      "",
+      "ENGINEERING",
+      ...weekTotals.map((wt) => wt.engineering),
+      monthlyTotals.engineering,
+      hourlyForm.engineeringRate,
+      monthlyTotals.engineering * (parseFloat(hourlyForm.engineeringRate) || 0),
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([
+      "",
+      "BUG FIXES",
+      ...weekTotals.map((wt) => wt.bugFixes),
+      monthlyTotals.bugFixes,
+      hourlyForm.bugFixesRate,
+      monthlyTotals.bugFixes * (parseFloat(hourlyForm.bugFixesRate) || 0),
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([
+      "",
+      "APP TESTING",
+      ...weekTotals.map((wt) => wt.appTesting),
+      monthlyTotals.appTesting,
+      hourlyForm.appTestingRate,
+      monthlyTotals.appTesting * (parseFloat(hourlyForm.appTestingRate) || 0),
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([]);
+    csvRows.push([]);
+    csvRows.push([]);
+    csvRows.push([]);
+
+    // Weekly sections
+    weeks.forEach((weekName, idx) => {
+      csvRows.push([
+        "",
+        `${weekName} - [DATE - DATE]`,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ]);
+      csvRows.push([
+        "",
+        "Project Name",
+        "Objective / Description",
+        "",
+        "Type",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ]);
+      csvRows.push([
+        "",
+        "",
+        "",
+        "",
+        "COMMS",
+        "ENGINEERING",
+        "BUG FIXES",
+        "APP TESTING",
+        "",
+        "",
+        "",
+        "",
+        "",
+      ]);
+
+      weeklyProjects[weekName].forEach((project) => {
+        project.objectives.forEach((objective, objIdx) => {
+          csvRows.push([
+            "",
+            objIdx === 0 ? project.name : "",
+            objective.description,
+            "",
+            objective.comms,
+            objective.engineering,
+            objective.bugFixes,
+            objective.appTesting,
+            "",
+            "",
+            "",
+            "",
+            "",
+          ]);
+        });
+      });
+
+      // Add empty rows for spacing
+      for (
+        let i = 0;
+        i < Math.max(0, 10 - weeklyProjects[weekName].length);
+        i++
+      ) {
+        csvRows.push(["", "", "", "", "", "", "", "", "", "", "", "", ""]);
+      }
+
+      const weekTotal = calculateWeekTotals(weekName);
+      csvRows.push([
+        "",
+        "",
+        "",
+        `TOTAL ${weekName.toUpperCase()}`,
+        weekTotal.comms,
+        weekTotal.engineering,
+        weekTotal.bugFixes,
+        weekTotal.appTesting,
+        "",
+        "",
+        "",
+        "",
+        "",
+      ]);
+      csvRows.push([]);
+      csvRows.push([]);
+    });
+
+    csvRows.push([
+      "",
+      "",
+      "",
+      "Projected Monthly Hour Totals:",
+      monthlyTotals.comms,
+      monthlyTotals.engineering,
+      monthlyTotals.bugFixes,
+      monthlyTotals.appTesting,
+      "",
+      "",
+      "",
+      "",
+    ]);
+    csvRows.push([]);
+    csvRows.push([]);
+    csvRows.push([]);
+
+    // Assumptions
+    csvRows.push([
+      "",
+      "Assumptions",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+    ]);
+    assumptions.forEach((assumption) => {
+      if (assumption.trim()) {
+        csvRows.push([
+          "",
+          assumption,
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+        ]);
+      }
+    });
+
+    return csvRows;
+  };
+
+  const handleCreateHourlyProjection = async () => {
+    if (!projectionName || !hourlyForm.vendor || !hourlyForm.month) {
+      alert("Please provide projection name, vendor, and month");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const generatedCSV = generateHourlyProjectionCSV();
+      const columnCount = generatedCSV.length > 0 ? generatedCSV[0].length : 0;
+
+      // Save directly to MongoDB
+      const res = await fetch(`/api/projects/${projectId}/projections`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: projectionName,
+          data: generatedCSV,
+          filename: `${projectionName}.csv`,
+          rowCount: generatedCSV.length,
+          columnCount: columnCount,
+        }),
+      });
+
+      if (res.ok) {
+        const newProjection = await res.json();
+        setProjections([newProjection, ...projections]);
+        setProjectionName("");
+        setCsvData([]);
+        setCsvFilename("");
+        // Reset hourly form
+        setHourlyForm({
+          vendor: "",
+          month: "",
+          commsRate: "",
+          engineeringRate: "",
+          bugFixesRate: "",
+          appTestingRate: "",
+        });
+        // Reset weeks and projects
+        setWeeks(["Week 1", "Week 2", "Week 3", "Week 4"]);
+        setWeeklyProjects({
+          "Week 1": [],
+          "Week 2": [],
+          "Week 3": [],
+          "Week 4": [],
+        });
+        setAssumptions([""]);
+        alert("Hourly projection created successfully!");
+      } else {
+        alert("Failed to create projection");
+      }
+    } catch (error) {
+      console.error("Error creating hourly projection:", error);
+      alert("Failed to create projection");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -285,6 +918,41 @@ export default function ProjectTabs({
               <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
                 Add New Projection
               </h3>
+
+              {/* Mode Toggle */}
+              <div className="mb-6 flex gap-2">
+                <button
+                  onClick={() => {
+                    setCreationMode("upload");
+                    setCsvData([]);
+                    setSelectedTemplate("");
+                    setTemplateRows([]);
+                  }}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    creationMode === "upload"
+                      ? "bg-accent-dark-orange text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-accent-light-purple hover:text-white"
+                  }`}
+                >
+                  Upload CSV
+                </button>
+                <button
+                  onClick={() => {
+                    setCreationMode("hourly");
+                    setCsvData([]);
+                    setCsvFilename("");
+                    setSelectedTemplate("");
+                  }}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    creationMode === "hourly"
+                      ? "bg-accent-dark-orange text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-accent-light-purple hover:text-white"
+                  }`}
+                >
+                  Hourly Projection
+                </button>
+              </div>
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-black dark:text-white">
@@ -297,35 +965,397 @@ export default function ProjectTabs({
                     className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-black dark:text-white">
-                    Upload CSV File
-                  </label>
-                  <input
-                    id="csv-file"
-                    type="file"
-                    accept=".csv"
-                    onChange={handleFileUpload}
-                    className="mt-1 block w-full text-sm"
-                  />
-                  {csvData.length > 0 && (
-                    <div className="mt-2 text-sm text-accent-olive font-semibold">
-                      <p>
-                        ✓ Loaded {csvData.length} rows from {csvFilename}
-                      </p>
-                      <p className="text-xs opacity-70">
-                        {(csvData[0] as any[])?.length || 0} columns detected
-                      </p>
+
+                {creationMode === "upload" ? (
+                  <div>
+                    <label className="block text-sm font-medium text-black dark:text-white">
+                      Upload CSV File
+                    </label>
+                    <input
+                      id="csv-file"
+                      type="file"
+                      accept=".csv"
+                      onChange={handleFileUpload}
+                      className="mt-1 block w-full text-sm"
+                    />
+                    {csvData.length > 0 && (
+                      <div className="mt-2 text-sm text-accent-olive font-semibold">
+                        <p>
+                          ✓ Loaded {csvData.length} rows from {csvFilename}
+                        </p>
+                        <p className="text-xs opacity-70">
+                          {(csvData[0] as any[])?.length || 0} columns detected
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                ) : creationMode === "hourly" ? (
+                  <div className="space-y-6">
+                    {/* Header Info */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                      <div>
+                        <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                          Vendor
+                        </label>
+                        <input
+                          type="text"
+                          value={hourlyForm.vendor}
+                          onChange={(e) =>
+                            setHourlyForm({
+                              ...hourlyForm,
+                              vendor: e.target.value,
+                            })
+                          }
+                          className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                          placeholder="Company name"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                          Month
+                        </label>
+                        <input
+                          type="text"
+                          value={hourlyForm.month}
+                          onChange={(e) =>
+                            setHourlyForm({
+                              ...hourlyForm,
+                              month: e.target.value,
+                            })
+                          }
+                          className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                          placeholder="January 2024"
+                        />
+                      </div>
                     </div>
-                  )}
-                </div>
-                <button
-                  onClick={handleAddProjection}
-                  disabled={loading}
-                  className="rounded-md bg-accent-dark-orange px-4 py-2 text-sm font-medium text-white hover:bg-accent-light-orange disabled:opacity-50"
-                >
-                  {loading ? "Adding..." : "Add Projection"}
-                </button>
+
+                    {/* Hourly Rates */}
+                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                      <h4 className="text-sm font-semibold text-black dark:text-white mb-3">
+                        Hourly Rates ($)
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                            COMMS
+                          </label>
+                          <input
+                            type="number"
+                            value={hourlyForm.commsRate}
+                            onChange={(e) =>
+                              setHourlyForm({
+                                ...hourlyForm,
+                                commsRate: e.target.value,
+                              })
+                            }
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            placeholder="75"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                            ENGINEERING
+                          </label>
+                          <input
+                            type="number"
+                            value={hourlyForm.engineeringRate}
+                            onChange={(e) =>
+                              setHourlyForm({
+                                ...hourlyForm,
+                                engineeringRate: e.target.value,
+                              })
+                            }
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            placeholder="100"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                            BUG FIXES
+                          </label>
+                          <input
+                            type="number"
+                            value={hourlyForm.bugFixesRate}
+                            onChange={(e) =>
+                              setHourlyForm({
+                                ...hourlyForm,
+                                bugFixesRate: e.target.value,
+                              })
+                            }
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            placeholder="85"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                            APP TESTING
+                          </label>
+                          <input
+                            type="number"
+                            value={hourlyForm.appTestingRate}
+                            onChange={(e) =>
+                              setHourlyForm({
+                                ...hourlyForm,
+                                appTestingRate: e.target.value,
+                              })
+                            }
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            placeholder="65"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Weekly Projects with Add/Remove Week buttons */}
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="font-semibold text-black dark:text-white">
+                        Weekly Breakdown
+                      </h4>
+                      <button
+                        onClick={addWeek}
+                        className="text-sm px-4 py-2 rounded-md bg-accent-olive text-white hover:bg-accent-dark-orange"
+                      >
+                        + Add Week
+                      </button>
+                    </div>
+
+                    {weeks.map((weekName, weekIdx) => {
+                      const weekTotal = calculateWeekTotals(weekName);
+                      return (
+                        <div
+                          key={weekName}
+                          className="border-2 border-accent-olive rounded-md p-4"
+                        >
+                          <div className="flex justify-between items-center mb-3">
+                            <h4 className="font-semibold text-black dark:text-white">
+                              {weekName}
+                            </h4>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => addProjectToWeek(weekName)}
+                                className="text-xs px-3 py-1 rounded-md bg-accent-light-purple text-white hover:bg-accent-dark-orange"
+                              >
+                                + Add Project
+                              </button>
+                              {weeks.length > 1 && (
+                                <button
+                                  onClick={() => removeWeek(weekName)}
+                                  className="text-xs px-3 py-1 rounded-md bg-red-500 text-white hover:bg-red-700"
+                                >
+                                  Remove Week
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            {weeklyProjects[weekName].map((project, idx) => (
+                              <div
+                                key={idx}
+                                className="border border-accent-olive rounded-md p-3 bg-gray-50 dark:bg-gray-900"
+                              >
+                                <div className="mb-2">
+                                  <input
+                                    type="text"
+                                    value={project.name}
+                                    onChange={(e) =>
+                                      updateWeeklyProject(
+                                        weekName,
+                                        idx,
+                                        "name",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full px-2 py-1 text-sm rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                                    placeholder="Project name"
+                                  />
+                                </div>
+
+                                {/* Multiple Objectives with hours per objective */}
+                                <div className="mb-2 space-y-3">
+                                  <div className="flex justify-between items-center">
+                                    <label className="text-xs font-medium text-black dark:text-white">
+                                      Objectives
+                                    </label>
+                                    <button
+                                      onClick={() =>
+                                        addObjectiveToProject(weekName, idx)
+                                      }
+                                      className="text-xs text-accent-light-purple hover:text-accent-dark-orange"
+                                    >
+                                      + Add Objective
+                                    </button>
+                                  </div>
+                                  {project.objectives.map(
+                                    (objective, objIdx) => (
+                                      <div
+                                        key={objIdx}
+                                        className="border-l-2 border-accent-light-purple pl-3 space-y-2"
+                                      >
+                                        <div className="flex gap-2 items-center">
+                                          <input
+                                            type="text"
+                                            value={objective.description}
+                                            onChange={(e) =>
+                                              updateProjectObjective(
+                                                weekName,
+                                                idx,
+                                                objIdx,
+                                                "description",
+                                                e.target.value
+                                              )
+                                            }
+                                            className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                                            placeholder={`Objective ${
+                                              objIdx + 1
+                                            }`}
+                                          />
+                                          {project.objectives.length > 1 && (
+                                            <button
+                                              onClick={() =>
+                                                removeObjectiveFromProject(
+                                                  weekName,
+                                                  idx,
+                                                  objIdx
+                                                )
+                                              }
+                                              className="text-red-500 hover:text-red-700 text-xs px-2"
+                                            >
+                                              ✕
+                                            </button>
+                                          )}
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                          {[
+                                            { key: "comms", label: "COMMS" },
+                                            {
+                                              key: "engineering",
+                                              label: "ENG",
+                                            },
+                                            { key: "bugFixes", label: "BUGS" },
+                                            {
+                                              key: "appTesting",
+                                              label: "TEST",
+                                            },
+                                          ].map(({ key, label }) => (
+                                            <div key={key}>
+                                              <label className="block text-xs text-black dark:text-white opacity-70 mb-1">
+                                                {label}
+                                              </label>
+                                              <input
+                                                type="number"
+                                                value={
+                                                  objective[
+                                                    key as keyof typeof objective
+                                                  ]
+                                                }
+                                                onChange={(e) =>
+                                                  updateProjectObjective(
+                                                    weekName,
+                                                    idx,
+                                                    objIdx,
+                                                    key,
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="w-full px-2 py-1 text-xs rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                                                placeholder="0"
+                                              />
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                                <button
+                                  onClick={() =>
+                                    removeProjectFromWeek(weekName, idx)
+                                  }
+                                  className="mt-2 text-xs text-red-500 hover:text-red-700"
+                                >
+                                  Remove Project
+                                </button>
+                              </div>
+                            ))}
+
+                            {weeklyProjects[weekName].length === 0 && (
+                              <p className="text-sm text-black dark:text-white opacity-50 text-center py-4">
+                                No projects for this week
+                              </p>
+                            )}
+                          </div>
+
+                          {weeklyProjects[weekName].length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-accent-olive">
+                              <p className="text-xs font-medium text-accent-light-purple">
+                                {weekName} Totals: COMMS: {weekTotal.comms}h |
+                                ENG: {weekTotal.engineering}h | BUGS:{" "}
+                                {weekTotal.bugFixes}h | TEST:{" "}
+                                {weekTotal.appTesting}h
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Assumptions */}
+                    <div className="border-2 border-accent-olive rounded-md p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-semibold text-black dark:text-white">
+                          Assumptions
+                        </h4>
+                        <button
+                          onClick={addAssumption}
+                          className="text-xs px-3 py-1 rounded-md bg-accent-light-purple text-white hover:bg-accent-dark-orange"
+                        >
+                          + Add Assumption
+                        </button>
+                      </div>
+                      <div className="space-y-2">
+                        {assumptions.map((assumption, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <input
+                              type="text"
+                              value={assumption}
+                              onChange={(e) =>
+                                updateAssumption(idx, e.target.value)
+                              }
+                              className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                              placeholder="Enter assumption"
+                            />
+                            <button
+                              onClick={() => removeAssumption(idx)}
+                              className="text-red-500 hover:text-red-700 text-xs px-2"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Generate Button */}
+                    <button
+                      onClick={handleCreateHourlyProjection}
+                      disabled={loading}
+                      className="w-full rounded-md bg-accent-light-purple px-4 py-2 text-sm font-medium text-white hover:bg-accent-dark-orange disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? "Saving..." : "Save Hourly Projection"}
+                    </button>
+                  </div>
+                ) : null}
+
+                {creationMode === "upload" && (
+                  <button
+                    onClick={handleAddProjection}
+                    disabled={loading}
+                    className="rounded-md bg-accent-dark-orange px-4 py-2 text-sm font-medium text-white hover:bg-accent-light-orange disabled:opacity-50"
+                  >
+                    {loading ? "Adding..." : "Add Projection"}
+                  </button>
+                )}
               </div>
             </div>
 
