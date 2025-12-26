@@ -40,7 +40,7 @@ async function dropUniqueIndex() {
     try {
       await collection.dropIndex("projectionId_1_userId_1");
       console.log("✅ Successfully dropped unique index");
-    } catch (error) {
+    } catch (error: any) {
       if (error.codeName === "IndexNotFound") {
         console.log(
           "ℹ️  Unique index not found (already removed or never existed)"
