@@ -62,7 +62,7 @@ export async function POST(
     }
 
     // Generate the view link (assumes the projection is viewable via the project page)
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    const baseUrl = "https://projections-tawny.vercel.app";
     const viewLink = `${baseUrl}/projects/${project._id}`;
 
     // Generate CSV attachment from projection data
