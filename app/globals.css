@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  /* Base colors - Light mode */
-  --background: #ffffff;
-  --foreground: #000000;
+  /* Base colors - Always dark */
+  --background: #0a0a0a;
+  --foreground: #ffffff;
   
   /* Accent colors from palette */
-  --accent-light-purple: #8b7fb8;
-  --accent-dark-purple: #3d3557;
-  --accent-olive: #6b7a4b;
-  --accent-light-orange: #e89848;
-  --accent-dark-orange: #e55a28;
+  --accent-light-purple: #a89bd4;
+  --accent-dark-purple: #5d527a;
+  --accent-olive: #8b9d6a;
+  --accent-light-orange: #f0a860;
+  --accent-dark-orange: #f07850;
   
   /* Semantic accent usage */
   --primary: var(--accent-light-purple);
@@ -20,9 +20,9 @@
   --danger: var(--accent-dark-orange);
   
   /* UI elements */
-  --border: #e5e5e5;
-  --hover: #f5f5f5;
-  --muted: #737373;
+  --border: #2a2a2a;
+  --hover: #1a1a1a;
+  --muted: #a3a3a3;
 }
 
 @theme inline {
@@ -38,24 +38,6 @@
   
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-.dark {
-  /* Base colors - Dark mode */
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  
-  /* Slightly adjusted accents for dark mode contrast */
-  --accent-light-purple: #a89bd4;
-  --accent-dark-purple: #5d527a;
-  --accent-olive: #8b9d6a;
-  --accent-light-orange: #f0a860;
-  --accent-dark-orange: #f07850;
-  
-  /* UI elements for dark mode */
-  --border: #2a2a2a;
-  --hover: #1a1a1a;
-  --muted: #a3a3a3;
 }
 
 body {

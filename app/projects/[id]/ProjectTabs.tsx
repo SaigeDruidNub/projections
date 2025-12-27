@@ -1971,24 +1971,24 @@ export default function ProjectTabs({
                                         .map((approval: any) => (
                                           <div
                                             key={approval._id}
-                                            className={`flex items-center justify-between p-2 rounded border ${borderColor} bg-white dark:bg-black`}
+                                            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded border ${borderColor} bg-white dark:bg-black gap-3`}
                                           >
-                                            <div className="flex items-center space-x-3 flex-1">
+                                            <div className="flex items-center space-x-3 flex-1 min-w-0">
                                               {approval.user?.image && (
                                                 <img
                                                   src={approval.user.image}
                                                   alt={approval.user.name}
-                                                  className="w-7 h-7 rounded-full"
+                                                  className="w-7 h-7 rounded-full flex-shrink-0"
                                                 />
                                               )}
-                                              <div className="flex-1">
+                                              <div className="flex-1 min-w-0">
                                                 <p className="font-medium text-xs text-black dark:text-white">
                                                   {approval.user?.name ||
                                                     approval.user?.email ||
                                                     "Unknown User"}
                                                 </p>
                                                 {approval.comment && (
-                                                  <p className="text-xs text-black dark:text-white opacity-70">
+                                                  <p className="text-xs text-black dark:text-white opacity-70 break-words">
                                                     {approval.comment}
                                                   </p>
                                                 )}
@@ -2011,7 +2011,7 @@ export default function ProjectTabs({
                                                 </p>
                                               </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 sm:flex-shrink-0">
                                               {approval.userId ===
                                               currentUserId ? (
                                                 <>
@@ -2024,7 +2024,7 @@ export default function ProjectTabs({
                                                       )
                                                     }
                                                     disabled={loading}
-                                                    className={`px-2 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 ${
+                                                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex-1 sm:flex-initial ${
                                                       approval.status ===
                                                       "approved"
                                                         ? "bg-accent-olive text-white"
@@ -2042,7 +2042,7 @@ export default function ProjectTabs({
                                                       )
                                                     }
                                                     disabled={loading}
-                                                    className={`px-2 py-1 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 ${
+                                                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex-1 sm:flex-initial ${
                                                       approval.status ===
                                                       "rejected"
                                                         ? "bg-red-500 text-white"
@@ -2054,7 +2054,7 @@ export default function ProjectTabs({
                                                 </>
                                               ) : (
                                                 <span
-                                                  className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                                                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${
                                                     approval.status ===
                                                     "approved"
                                                       ? "bg-accent-olive text-white"
