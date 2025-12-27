@@ -39,10 +39,10 @@ export default function NewProject() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black py-12">
+    <div className="min-h-screen bg-black py-12">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-lg bg-white dark:bg-black p-8 shadow-lg border-2 border-accent-olive">
-          <h1 className="mb-6 text-2xl font-bold text-black dark:text-white">
+        <div className="rounded-lg bg-black p-8 shadow-lg border-2 border-accent-olive">
+          <h1 className="mb-6 text-2xl font-bold text-white">
             Create New Project
           </h1>
 
@@ -50,7 +50,7 @@ export default function NewProject() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium text-black dark:text-white"
+                className="block text-sm font-medium text-white"
               >
                 Project Name
               </label>
@@ -62,14 +62,14 @@ export default function NewProject() {
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 shadow-sm focus:border-accent-light-purple focus:outline-none focus:ring-2 focus:ring-accent-light-purple bg-white dark:bg-black text-black dark:text-white"
+                className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 shadow-sm focus:border-accent-light-purple focus:outline-none focus:ring-2 focus:ring-accent-light-purple bg-black text-white"
               />
             </div>
 
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-black dark:text-white"
+                className="block text-sm font-medium text-white"
               >
                 Description (Optional)
               </label>
@@ -80,7 +80,7 @@ export default function NewProject() {
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 shadow-sm focus:border-accent-light-purple focus:outline-none focus:ring-2 focus:ring-accent-light-purple bg-white dark:bg-black text-black dark:text-white"
+                className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 shadow-sm focus:border-accent-light-purple focus:outline-none focus:ring-2 focus:ring-accent-light-purple bg-black text-white"
               />
             </div>
 
@@ -94,7 +94,7 @@ export default function NewProject() {
               </button>
               <Link
                 href="/dashboard"
-                className="rounded-md border-2 border-accent-olive px-4 py-2 text-sm font-medium text-black dark:text-white hover:bg-accent-olive hover:text-white transition-colors"
+                className="rounded-md border-2 border-accent-olive px-4 py-2 text-sm font-medium text-white hover:bg-accent-olive hover:text-white transition-colors"
               >
                 Cancel
               </Link>
@@ -105,3 +105,4 @@ export default function NewProject() {
     </div>
   );
 }
+

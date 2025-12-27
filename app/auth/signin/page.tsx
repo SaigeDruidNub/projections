@@ -4,13 +4,13 @@ import { signIn } from "next-auth/react";
 
 export default function SignIn() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="w-full max-w-md space-y-8 rounded-lg bg-black border-2 border-accent-olive p-8 shadow-lg">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="text-3xl font-bold tracking-tight text-white">
             Welcome to Projections
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-white opacity-70">
             Sign in to manage your projects and approvals
           </p>
         </div>
@@ -18,7 +18,7 @@ export default function SignIn() {
         <div className="space-y-3">
           <button
             onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+            className="flex w-full items-center justify-center gap-3 rounded-md border-2 border-accent-olive bg-gray-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-600"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -43,7 +43,7 @@ export default function SignIn() {
 
           <button
             onClick={() => signIn("azure-ad", { callbackUrl: "/dashboard" })}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+            className="flex w-full items-center justify-center gap-3 rounded-md border-2 border-accent-olive bg-gray-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-600"
           >
             <svg className="h-5 w-5" viewBox="0 0 23 23">
               <path fill="#f25022" d="M0 0h11v11H0z" />

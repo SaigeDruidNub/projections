@@ -48,11 +48,9 @@ export default async function ProjectPage({
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black py-12">
+      <div className="min-h-screen bg-black py-12">
         <div className="mx-auto max-w-7xl px-4 text-center">
-          <h1 className="text-2xl font-bold text-black dark:text-white">
-            Project not found
-          </h1>
+          <h1 className="text-2xl font-bold text-white">Project not found</h1>
           <Link
             href="/dashboard"
             className="mt-4 inline-block text-accent-light-purple hover:text-accent-dark-orange transition-colors"
@@ -65,24 +63,18 @@ export default async function ProjectPage({
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-black">
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black dark:text-white">
-            {data.project.name}
-          </h1>
+          <h1 className="text-3xl font-bold text-white">{data.project.name}</h1>
           {data.project.description && (
-            <p className="mt-2 text-gray-700 dark:text-gray-300">
-              {data.project.description}
-            </p>
+            <p className="mt-2 text-gray-300">{data.project.description}</p>
           )}
         </div>
 
         <Suspense
           fallback={
-            <div className="text-center py-8 text-black dark:text-white">
-              Loading...
-            </div>
+            <div className="text-center py-8 text-white">Loading...</div>
           }
         >
           <ProjectTabs

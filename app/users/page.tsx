@@ -41,27 +41,27 @@ export default async function UsersPage() {
   const users = await getUsers();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-black">
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-black dark:text-white">
+          <h1 className="text-3xl font-bold text-white">
             Users
           </h1>
-          <p className="mt-2 text-black dark:text-white opacity-70">
+          <p className="mt-2 text-white opacity-70">
             All registered users in the system
           </p>
         </div>
 
         {users.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-black dark:text-white opacity-60">
+            <p className="text-white opacity-60">
               No users found
             </p>
           </div>
         ) : (
-          <div className="bg-white dark:bg-black shadow-sm rounded-lg overflow-hidden border-2 border-accent-olive">
+          <div className="bg-black shadow-sm rounded-lg overflow-hidden border-2 border-accent-olive">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-accent-olive">
                 <thead className="bg-accent-light-purple">
@@ -77,7 +77,7 @@ export default async function UsersPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white dark:bg-black divide-y divide-accent-olive">
+                <tbody className="bg-black divide-y divide-accent-olive">
                   {users.map((user: any) => (
                     <tr
                       key={user._id}
@@ -100,18 +100,18 @@ export default async function UsersPage() {
                             </div>
                           )}
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-black dark:text-white">
+                            <div className="text-sm font-medium text-white">
                               {user.name || "Anonymous"}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-black dark:text-white">
+                        <div className="text-sm text-white">
                           {user.email}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-black dark:text-white opacity-70">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-white opacity-70">
                         {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -120,7 +120,7 @@ export default async function UsersPage() {
               </table>
             </div>
             <div className="bg-accent-olive bg-opacity-10 px-6 py-3 border-t-2 border-accent-olive">
-              <p className="text-sm text-black dark:text-white">
+              <p className="text-sm text-white">
                 Total: <span className="font-medium">{users.length}</span> user
                 {users.length !== 1 ? "s" : ""}
               </p>
@@ -131,3 +131,4 @@ export default async function UsersPage() {
     </div>
   );
 }
+

@@ -37,12 +37,12 @@ export default async function Dashboard() {
   const projects = await getProjects();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-black">
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-black dark:text-white">
+          <h2 className="text-2xl font-bold text-white">
             Projects
           </h2>
           <Link
@@ -55,7 +55,7 @@ export default async function Dashboard() {
 
         {projects.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-black dark:text-white">
+            <p className="text-white">
               No projects yet. Create your first project to get started!
             </p>
           </div>
@@ -65,17 +65,17 @@ export default async function Dashboard() {
               <Link
                 key={project._id}
                 href={`/projects/${project._id}`}
-                className="block rounded-lg bg-white dark:bg-black p-6 shadow-sm border-2 border-accent-olive hover:border-accent-light-purple transition-all hover:shadow-md"
+                className="block rounded-lg bg-black p-6 shadow-sm border-2 border-accent-olive hover:border-accent-light-purple transition-all hover:shadow-md"
               >
-                <h3 className="text-lg font-semibold text-black dark:text-white">
+                <h3 className="text-lg font-semibold text-white">
                   {project.name}
                 </h3>
                 {project.description && (
-                  <p className="mt-2 text-sm text-black dark:text-white opacity-70">
+                  <p className="mt-2 text-sm text-white opacity-70">
                     {project.description}
                   </p>
                 )}
-                <p className="mt-4 text-xs text-black dark:text-white opacity-60">
+                <p className="mt-4 text-xs text-white opacity-60">
                   Created {new Date(project.createdAt).toLocaleDateString()}
                 </p>
               </Link>
@@ -86,3 +86,4 @@ export default async function Dashboard() {
     </div>
   );
 }
+

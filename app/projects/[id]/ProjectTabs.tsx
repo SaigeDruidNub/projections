@@ -1013,7 +1013,7 @@ export default function ProjectTabs({
             className={`${
               activeTab === "projections"
                 ? "border-accent-dark-orange text-accent-dark-orange"
-                : "border-transparent text-black dark:text-white hover:border-accent-olive hover:text-accent-light-purple"
+                : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
             } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
           >
             Projections
@@ -1023,7 +1023,7 @@ export default function ProjectTabs({
             className={`${
               activeTab === "approvals"
                 ? "border-accent-dark-orange text-accent-dark-orange"
-                : "border-transparent text-black dark:text-white hover:border-accent-olive hover:text-accent-light-purple"
+                : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
             } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
           >
             Approvals
@@ -1033,7 +1033,7 @@ export default function ProjectTabs({
             className={`${
               activeTab === "features"
                 ? "border-accent-dark-orange text-accent-dark-orange"
-                : "border-transparent text-black dark:text-white hover:border-accent-olive hover:text-accent-light-purple"
+                : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
             } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
           >
             Features
@@ -1044,8 +1044,8 @@ export default function ProjectTabs({
       <div className="mt-8">
         {activeTab === "projections" && (
           <div className="space-y-8">
-            <div className="rounded-lg bg-white dark:bg-black p-6 shadow border-2 border-accent-olive">
-              <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
+            <div className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive">
+              <h3 className="mb-4 text-lg font-semibold text-white">
                 Add New Projection
               </h3>
 
@@ -1061,7 +1061,7 @@ export default function ProjectTabs({
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     creationMode === "upload"
                       ? "bg-accent-dark-orange text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-accent-light-purple hover:text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
                   }`}
                 >
                   Upload CSV
@@ -1076,7 +1076,7 @@ export default function ProjectTabs({
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     creationMode === "hourly"
                       ? "bg-accent-dark-orange text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-accent-light-purple hover:text-white"
+                      : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
                   }`}
                 >
                   Hourly Projection
@@ -1085,20 +1085,20 @@ export default function ProjectTabs({
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white">
+                  <label className="block text-sm font-medium text-white">
                     Projection Name
                   </label>
                   <input
                     type="text"
                     value={projectionName}
                     onChange={(e) => setProjectionName(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
                   />
                 </div>
 
                 {creationMode === "upload" ? (
                   <div>
-                    <label className="block text-sm font-medium text-black dark:text-white">
+                    <label className="block text-sm font-medium text-white">
                       Upload CSV File
                     </label>
                     <input
@@ -1124,7 +1124,7 @@ export default function ProjectTabs({
                     {/* Header Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
                       <div>
-                        <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                        <label className="block text-xs font-medium text-white mb-1">
                           Vendor
                         </label>
                         <input
@@ -1136,12 +1136,12 @@ export default function ProjectTabs({
                               vendor: e.target.value,
                             })
                           }
-                          className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                          className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                           placeholder="Company name"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                        <label className="block text-xs font-medium text-white mb-1">
                           Month
                         </label>
                         <input
@@ -1153,7 +1153,7 @@ export default function ProjectTabs({
                               month: e.target.value,
                             })
                           }
-                          className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                          className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                           placeholder="January 2024"
                         />
                       </div>
@@ -1161,12 +1161,12 @@ export default function ProjectTabs({
 
                     {/* Hourly Rates */}
                     <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
-                      <h4 className="text-sm font-semibold text-black dark:text-white mb-3">
+                      <h4 className="text-sm font-semibold text-white mb-3">
                         Hourly Rates ($)
                       </h4>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div>
-                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                          <label className="block text-xs font-medium text-white mb-1">
                             COMMS
                           </label>
                           <input
@@ -1178,12 +1178,12 @@ export default function ProjectTabs({
                                 commsRate: e.target.value,
                               })
                             }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                             placeholder="50"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                          <label className="block text-xs font-medium text-white mb-1">
                             ENGINEERING
                           </label>
                           <input
@@ -1195,12 +1195,12 @@ export default function ProjectTabs({
                                 engineeringRate: e.target.value,
                               })
                             }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                             placeholder="175"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                          <label className="block text-xs font-medium text-white mb-1">
                             BUG FIXES
                           </label>
                           <input
@@ -1212,12 +1212,12 @@ export default function ProjectTabs({
                                 bugFixesRate: e.target.value,
                               })
                             }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                             placeholder="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-black dark:text-white mb-1">
+                          <label className="block text-xs font-medium text-white mb-1">
                             APP TESTING
                           </label>
                           <input
@@ -1229,7 +1229,7 @@ export default function ProjectTabs({
                                 appTestingRate: e.target.value,
                               })
                             }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                             placeholder="75"
                           />
                         </div>
@@ -1252,7 +1252,7 @@ export default function ProjectTabs({
                       />
                       <label
                         htmlFor="isOverage"
-                        className="text-sm font-medium text-black dark:text-white cursor-pointer"
+                        className="text-sm font-medium text-white cursor-pointer"
                       >
                         Is Overage
                       </label>
@@ -1260,7 +1260,7 @@ export default function ProjectTabs({
 
                     {/* Weekly Projects with Add/Remove Week buttons */}
                     <div className="flex justify-between items-center mb-4">
-                      <h4 className="font-semibold text-black dark:text-white">
+                      <h4 className="font-semibold text-white">
                         Weekly Breakdown
                       </h4>
                       <button
@@ -1279,7 +1279,7 @@ export default function ProjectTabs({
                           className="border-2 border-accent-olive rounded-md p-4"
                         >
                           <div className="flex justify-between items-center mb-3">
-                            <h4 className="font-semibold text-black dark:text-white">
+                            <h4 className="font-semibold text-white">
                               {weekName}
                             </h4>
                             <div className="flex gap-2">
@@ -1318,7 +1318,7 @@ export default function ProjectTabs({
                                         e.target.value
                                       )
                                     }
-                                    className="w-full px-2 py-1 text-sm rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                                    className="w-full px-2 py-1 text-sm rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                                     placeholder="Project name"
                                   />
                                 </div>
@@ -1326,7 +1326,7 @@ export default function ProjectTabs({
                                 {/* Multiple Objectives with hours per objective */}
                                 <div className="mb-2 space-y-3">
                                   <div className="flex justify-between items-center">
-                                    <label className="text-xs font-medium text-black dark:text-white">
+                                    <label className="text-xs font-medium text-white">
                                       Objectives
                                     </label>
                                     <button
@@ -1357,7 +1357,7 @@ export default function ProjectTabs({
                                                 e.target.value
                                               )
                                             }
-                                            className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                                            className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                                             placeholder={`Objective ${
                                               objIdx + 1
                                             }`}
@@ -1391,7 +1391,7 @@ export default function ProjectTabs({
                                             },
                                           ].map(({ key, label }) => (
                                             <div key={key}>
-                                              <label className="block text-xs text-black dark:text-white opacity-70 mb-1">
+                                              <label className="block text-xs text-white opacity-70 mb-1">
                                                 {label}
                                               </label>
                                               <input
@@ -1410,7 +1410,7 @@ export default function ProjectTabs({
                                                     e.target.value
                                                   )
                                                 }
-                                                className="w-full px-2 py-1 text-xs rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                                                className="w-full px-2 py-1 text-xs rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                                                 placeholder="0"
                                               />
                                             </div>
@@ -1432,7 +1432,7 @@ export default function ProjectTabs({
                             ))}
 
                             {weeklyProjects[weekName].length === 0 && (
-                              <p className="text-sm text-black dark:text-white opacity-50 text-center py-4">
+                              <p className="text-sm text-white opacity-50 text-center py-4">
                                 No projects for this week
                               </p>
                             )}
@@ -1455,7 +1455,7 @@ export default function ProjectTabs({
                     {/* Assumptions */}
                     <div className="border-2 border-accent-olive rounded-md p-4">
                       <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-semibold text-black dark:text-white">
+                        <h4 className="font-semibold text-white">
                           Assumptions
                         </h4>
                         <button
@@ -1474,7 +1474,7 @@ export default function ProjectTabs({
                               onChange={(e) =>
                                 updateAssumption(idx, e.target.value)
                               }
-                              className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                              className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
                               placeholder="Enter assumption"
                             />
                             <button
@@ -1512,11 +1512,11 @@ export default function ProjectTabs({
             </div>
 
             <div>
-              <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
+              <h3 className="mb-4 text-lg font-semibold text-white">
                 Existing Projections
               </h3>
               {projections.length === 0 ? (
-                <p className="text-black dark:text-white opacity-60">
+                <p className="text-white opacity-60">
                   No projections yet
                 </p>
               ) : (
@@ -1547,7 +1547,7 @@ export default function ProjectTabs({
                     return (
                       <div
                         key={proj._id}
-                        className={`rounded-lg bg-white dark:bg-black p-6 shadow border-2 ${
+                        className={`rounded-lg bg-black p-6 shadow border-2 ${
                           isOverage
                             ? "border-accent-dark-orange"
                             : "border-accent-olive"
@@ -1555,7 +1555,7 @@ export default function ProjectTabs({
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <h4 className="font-semibold text-black dark:text-white">
+                            <h4 className="font-semibold text-white">
                               {proj.name}
                             </h4>
                             {proj.filename && (
@@ -1579,18 +1579,18 @@ export default function ProjectTabs({
                             </button>
                           </div>
                         </div>
-                        <p className="text-sm text-black dark:text-white opacity-70">
+                        <p className="text-sm text-white opacity-70">
                           {proj.rowCount || data.length} rows ×{" "}
                           {proj.columnCount || columnCount} columns
                         </p>
-                        <p className="text-xs text-black dark:text-white opacity-70">
+                        <p className="text-xs text-white opacity-70">
                           Created {new Date(proj.createdAt).toLocaleString()}
                         </p>
                         {data.length > 0 && (
                           <div className="mt-4 overflow-x-auto">
                             <table className="min-w-full divide-y divide-accent-olive text-sm">
                               {isArrayFormat ? (
-                                <tbody className="divide-y divide-accent-olive bg-white dark:bg-black">
+                                <tbody className="divide-y divide-accent-olive bg-black">
                                   {data
                                     .slice(0, 10)
                                     .map((row: any[], idx: number) => (
@@ -1612,7 +1612,7 @@ export default function ProjectTabs({
                                                   cell === null ||
                                                   cell === undefined
                                                 ? "text-gray-400"
-                                                : "text-black dark:text-white"
+                                                : "text-white"
                                             }`}
                                           >
                                             {cell === "" ||
@@ -1640,7 +1640,7 @@ export default function ProjectTabs({
                                       ))}
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-accent-olive bg-white dark:bg-black">
+                                  <tbody className="divide-y divide-accent-olive bg-black">
                                     {data
                                       .slice(0, 10)
                                       .map((row: any, idx: number) => (
@@ -1649,7 +1649,7 @@ export default function ProjectTabs({
                                             (val: any, i: number) => (
                                               <td
                                                 key={i}
-                                                className="px-4 py-2 text-black dark:text-white"
+                                                className="px-4 py-2 text-white"
                                               >
                                                 {val === "" ||
                                                 val === null ||
@@ -1666,7 +1666,7 @@ export default function ProjectTabs({
                               )}
                             </table>
                             {data.length > 10 && (
-                              <p className="mt-2 text-sm text-black dark:text-white opacity-70">
+                              <p className="mt-2 text-sm text-white opacity-70">
                                 Showing 10 of {data.length} rows
                               </p>
                             )}
@@ -1692,11 +1692,11 @@ export default function ProjectTabs({
                           {showEmailHistory[proj._id] && (
                             <div className="mt-3 space-y-2">
                               {!emailHistory[proj._id] ? (
-                                <p className="text-sm text-black dark:text-white opacity-60">
+                                <p className="text-sm text-white opacity-60">
                                   Loading...
                                 </p>
                               ) : emailHistory[proj._id].length === 0 ? (
-                                <p className="text-sm text-black dark:text-white opacity-60">
+                                <p className="text-sm text-white opacity-60">
                                   No emails sent yet
                                 </p>
                               ) : (
@@ -1720,23 +1720,23 @@ export default function ProjectTabs({
                                                 ? "✓ Sent"
                                                 : "✗ Failed"}
                                             </span>
-                                            <span className="text-sm font-medium text-black dark:text-white">
+                                            <span className="text-sm font-medium text-white">
                                               {email.recipientName ||
                                                 email.recipientEmail}
                                             </span>
                                           </div>
                                           {email.recipientName && (
-                                            <p className="text-xs text-black dark:text-white opacity-60 mt-1">
+                                            <p className="text-xs text-white opacity-60 mt-1">
                                               {email.recipientEmail}
                                             </p>
                                           )}
-                                          <p className="text-xs text-black dark:text-white opacity-60 mt-1">
+                                          <p className="text-xs text-white opacity-60 mt-1">
                                             Sent by{" "}
                                             {email.sentByName ||
                                               email.sentByEmail}
                                           </p>
                                           {email.message && (
-                                            <p className="text-xs text-black dark:text-white opacity-70 mt-2 italic">
+                                            <p className="text-xs text-white opacity-70 mt-2 italic">
                                               "{email.message}"
                                             </p>
                                           )}
@@ -1746,7 +1746,7 @@ export default function ProjectTabs({
                                             </p>
                                           )}
                                         </div>
-                                        <span className="text-xs text-black dark:text-white opacity-60 whitespace-nowrap ml-4">
+                                        <span className="text-xs text-white opacity-60 whitespace-nowrap ml-4">
                                           {new Date(
                                             email.createdAt
                                           ).toLocaleString()}
@@ -1770,13 +1770,13 @@ export default function ProjectTabs({
 
         {activeTab === "approvals" && (
           <div className="space-y-8">
-            <div className="rounded-lg bg-white dark:bg-black p-6 shadow border-2 border-accent-olive">
-              <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
+            <div className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive">
+              <h3 className="mb-4 text-lg font-semibold text-white">
                 Request Approvals
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Select Projection
                   </label>
                   <select
@@ -1787,7 +1787,7 @@ export default function ProjectTabs({
                         loadApprovals(e.target.value);
                       }
                     }}
-                    className="block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                    className="block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
                   >
                     <option value="">-- Select a projection --</option>
                     {projections.map((proj) => (
@@ -1799,12 +1799,12 @@ export default function ProjectTabs({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Select Users to Approve
                   </label>
                   <div className="space-y-2 max-h-60 overflow-y-auto border-2 border-accent-olive rounded-md p-3">
                     {users.length === 0 ? (
-                      <p className="text-sm text-black dark:text-white opacity-60">
+                      <p className="text-sm text-white opacity-60">
                         No users available
                       </p>
                     ) : (
@@ -1827,7 +1827,7 @@ export default function ProjectTabs({
                                 className="w-6 h-6 rounded-full"
                               />
                             )}
-                            <span className="text-sm text-black dark:text-white">
+                            <span className="text-sm text-white">
                               {user.name || user.email}
                             </span>
                           </div>
@@ -1856,11 +1856,11 @@ export default function ProjectTabs({
             </div>
 
             <div>
-              <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
+              <h3 className="mb-4 text-lg font-semibold text-white">
                 All Projection Approvals
               </h3>
               {projections.length === 0 ? (
-                <p className="text-black dark:text-white opacity-60">
+                <p className="text-white opacity-60">
                   No projections yet
                 </p>
               ) : (
@@ -1876,11 +1876,11 @@ export default function ProjectTabs({
                     return (
                       <div
                         key={proj._id}
-                        className={`rounded-lg bg-white dark:bg-black p-6 shadow border-2 ${borderColor}`}
+                        className={`rounded-lg bg-black p-6 shadow border-2 ${borderColor}`}
                       >
                         <div className="flex items-start justify-between mb-4">
                           <div>
-                            <h4 className="font-semibold text-lg text-black dark:text-white">
+                            <h4 className="font-semibold text-lg text-white">
                               {proj.name}
                             </h4>
                             {proj.filename && (
@@ -1900,7 +1900,7 @@ export default function ProjectTabs({
                         </div>
 
                         {approvals.length === 0 ? (
-                          <p className="text-sm text-black dark:text-white opacity-60">
+                          <p className="text-sm text-white opacity-60">
                             No approval requests yet
                           </p>
                         ) : (
@@ -1971,7 +1971,7 @@ export default function ProjectTabs({
                                         .map((approval: any) => (
                                           <div
                                             key={approval._id}
-                                            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded border ${borderColor} bg-white dark:bg-black gap-3`}
+                                            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded border ${borderColor} bg-black gap-3`}
                                           >
                                             <div className="flex items-center space-x-3 flex-1 min-w-0">
                                               {approval.user?.image && (
@@ -1982,17 +1982,17 @@ export default function ProjectTabs({
                                                 />
                                               )}
                                               <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-xs text-black dark:text-white">
+                                                <p className="font-medium text-xs text-white">
                                                   {approval.user?.name ||
                                                     approval.user?.email ||
                                                     "Unknown User"}
                                                 </p>
                                                 {approval.comment && (
-                                                  <p className="text-xs text-black dark:text-white opacity-70 break-words">
+                                                  <p className="text-xs text-white opacity-70 break-words">
                                                     {approval.comment}
                                                   </p>
                                                 )}
-                                                <p className="text-xs text-black dark:text-white opacity-60 mt-1">
+                                                <p className="text-xs text-white opacity-60 mt-1">
                                                   {approval.status ===
                                                     "approved" &&
                                                   approval.approvedAt
@@ -2028,7 +2028,7 @@ export default function ProjectTabs({
                                                       approval.status ===
                                                       "approved"
                                                         ? "bg-accent-olive text-white"
-                                                        : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-accent-olive hover:text-white"
+                                                        : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-accent-olive hover:text-white"
                                                     }`}
                                                   >
                                                     ✓ Approve
@@ -2046,7 +2046,7 @@ export default function ProjectTabs({
                                                       approval.status ===
                                                       "rejected"
                                                         ? "bg-red-500 text-white"
-                                                        : "bg-gray-200 dark:bg-gray-700 text-black dark:text-white hover:bg-red-500 hover:text-white"
+                                                        : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-red-500 hover:text-white"
                                                     }`}
                                                   >
                                                     ✗ Reject
@@ -2091,13 +2091,13 @@ export default function ProjectTabs({
 
         {activeTab === "features" && (
           <div className="space-y-8">
-            <div className="rounded-lg bg-white dark:bg-black p-6 shadow border-2 border-accent-olive">
-              <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
+            <div className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive">
+              <h3 className="mb-4 text-lg font-semibold text-white">
                 Request New Feature
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white">
+                  <label className="block text-sm font-medium text-white">
                     Feature Name
                   </label>
                   <input
@@ -2106,11 +2106,11 @@ export default function ProjectTabs({
                     onChange={(e) =>
                       setFeatureForm({ ...featureForm, name: e.target.value })
                     }
-                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-black dark:text-white">
+                  <label className="block text-sm font-medium text-white">
                     Description
                   </label>
                   <textarea
@@ -2122,7 +2122,7 @@ export default function ProjectTabs({
                       })
                     }
                     rows={4}
-                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
                   />
                 </div>
                 <button
@@ -2136,11 +2136,11 @@ export default function ProjectTabs({
             </div>
 
             <div>
-              <h3 className="mb-4 text-lg font-semibold text-black dark:text-white">
+              <h3 className="mb-4 text-lg font-semibold text-white">
                 Feature Requests
               </h3>
               {features.length === 0 ? (
-                <p className="text-black dark:text-white opacity-60">
+                <p className="text-white opacity-60">
                   No feature requests yet
                 </p>
               ) : (
@@ -2148,17 +2148,17 @@ export default function ProjectTabs({
                   {features.map((feature: any) => (
                     <div
                       key={feature._id}
-                      className="rounded-lg bg-white dark:bg-black p-6 shadow border-2 border-accent-olive"
+                      className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive"
                     >
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-semibold text-black dark:text-white">
+                          <h4 className="font-semibold text-white">
                             {feature.name}
                           </h4>
-                          <p className="mt-1 text-sm text-black dark:text-white opacity-70">
+                          <p className="mt-1 text-sm text-white opacity-70">
                             {feature.description}
                           </p>
-                          <p className="mt-2 text-xs text-black dark:text-white opacity-70">
+                          <p className="mt-2 text-xs text-white opacity-70">
                             Status:{" "}
                             <span
                               className={`font-medium ${
@@ -2166,7 +2166,7 @@ export default function ProjectTabs({
                                   ? "text-accent-olive"
                                   : feature.status === "pending"
                                   ? "text-accent-light-orange"
-                                  : "text-black dark:text-white"
+                                  : "text-white"
                               }`}
                             >
                               {feature.status}
@@ -2186,10 +2186,10 @@ export default function ProjectTabs({
       {/* Email Projection Dialog */}
       {showEmailDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-black rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-accent-olive">
+          <div className="bg-black rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-accent-olive">
             <div className="p-6 border-b border-accent-olive">
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-semibold text-black dark:text-white">
+                <h3 className="text-xl font-semibold text-white">
                   📧 Email Projection
                 </h3>
                 <button
@@ -2199,7 +2199,7 @@ export default function ProjectTabs({
                     setEmailSelectedUsers([]);
                     setEmailMessage("");
                   }}
-                  className="text-black dark:text-white hover:text-accent-dark-orange text-2xl font-bold"
+                  className="text-white hover:text-accent-dark-orange text-2xl font-bold"
                 >
                   ×
                 </button>
@@ -2208,11 +2208,11 @@ export default function ProjectTabs({
 
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Select Users to Email
                 </label>
                 {users.length === 0 ? (
-                  <p className="text-sm text-black dark:text-white opacity-60">
+                  <p className="text-sm text-white opacity-60">
                     No users available
                   </p>
                 ) : (
@@ -2229,11 +2229,11 @@ export default function ProjectTabs({
                           className="h-4 w-4 rounded border-accent-olive text-accent-olive focus:ring-accent-light-purple"
                         />
                         <div>
-                          <p className="text-sm font-medium text-black dark:text-white">
+                          <p className="text-sm font-medium text-white">
                             {user.name || user.email}
                           </p>
                           {user.name && (
-                            <p className="text-xs text-black dark:text-white opacity-60">
+                            <p className="text-xs text-white opacity-60">
                               {user.email}
                             </p>
                           )}
@@ -2242,13 +2242,13 @@ export default function ProjectTabs({
                     ))}
                   </div>
                 )}
-                <p className="mt-2 text-xs text-black dark:text-white opacity-70">
+                <p className="mt-2 text-xs text-white opacity-70">
                   {emailSelectedUsers.length} user(s) selected
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black dark:text-white mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Optional Message
                 </label>
                 <textarea
@@ -2256,7 +2256,7 @@ export default function ProjectTabs({
                   onChange={(e) => setEmailMessage(e.target.value)}
                   rows={4}
                   placeholder="Add a message to include in the email (optional)"
-                  className="w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
+                  className="w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
                 />
               </div>
             </div>
@@ -2270,7 +2270,7 @@ export default function ProjectTabs({
                   setEmailMessage("");
                 }}
                 disabled={loading}
-                className="px-4 py-2 rounded-md border border-accent-olive text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+                className="px-4 py-2 rounded-md border border-accent-olive text-white hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
               >
                 Cancel
               </button>

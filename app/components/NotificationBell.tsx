@@ -103,9 +103,9 @@ export default function NotificationBell() {
             className="fixed inset-0 z-10"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-black border-2 border-accent-olive rounded-lg shadow-lg z-20 max-h-96 overflow-y-auto">
+          <div className="absolute right-0 mt-2 w-96 bg-black border-2 border-accent-olive rounded-lg shadow-lg z-20 max-h-96 overflow-y-auto">
             <div className="p-4 border-b-2 border-accent-olive flex items-center justify-between">
-              <h3 className="font-semibold text-black dark:text-white">
+              <h3 className="font-semibold text-white">
                 Notifications
               </h3>
               {unreadCount > 0 && (
@@ -119,7 +119,7 @@ export default function NotificationBell() {
               )}
             </div>
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-black dark:text-white opacity-60">
+              <div className="p-8 text-center text-white opacity-60">
                 No notifications
               </div>
             ) : (
@@ -147,10 +147,10 @@ export default function NotificationBell() {
                           {getNotificationIcon(notification.type)}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm text-black dark:text-white">
+                          <p className="font-medium text-sm text-white">
                             {notification.title}
                           </p>
-                          <p className="text-xs text-black dark:text-white opacity-70 mt-1">
+                          <p className="text-xs text-white opacity-70 mt-1">
                             {notification.message}
                           </p>
                           <p className="text-xs text-accent-light-purple mt-1">
@@ -172,3 +172,4 @@ export default function NotificationBell() {
     </div>
   );
 }
+
