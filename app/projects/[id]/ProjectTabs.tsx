@@ -1061,7 +1061,7 @@ export default function ProjectTabs({
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     creationMode === "upload"
                       ? "bg-accent-dark-orange text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
+                      : "bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
                   }`}
                 >
                   Upload CSV
@@ -1076,7 +1076,7 @@ export default function ProjectTabs({
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     creationMode === "hourly"
                       ? "bg-accent-dark-orange text-white"
-                      : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
+                      : "bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
                   }`}
                 >
                   Hourly Projection
@@ -1122,7 +1122,7 @@ export default function ProjectTabs({
                 ) : creationMode === "hourly" ? (
                   <div className="space-y-6">
                     {/* Header Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-900 rounded-md">
                       <div>
                         <label className="block text-xs font-medium text-white mb-1">
                           Vendor
@@ -1160,7 +1160,7 @@ export default function ProjectTabs({
                     </div>
 
                     {/* Hourly Rates */}
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                    <div className="p-4 bg-gray-900 rounded-md">
                       <h4 className="text-sm font-semibold text-white mb-3">
                         Hourly Rates ($)
                       </h4>
@@ -1237,7 +1237,7 @@ export default function ProjectTabs({
                     </div>
 
                     {/* Is Overage Checkbox */}
-                    <div className="flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                    <div className="flex items-center gap-2 p-4 bg-gray-900 rounded-md">
                       <input
                         type="checkbox"
                         id="isOverage"
@@ -1304,7 +1304,7 @@ export default function ProjectTabs({
                             {weeklyProjects[weekName].map((project, idx) => (
                               <div
                                 key={idx}
-                                className="border border-accent-olive rounded-md p-3 bg-gray-50 dark:bg-gray-900"
+                                className="border border-accent-olive rounded-md p-3 bg-gray-900"
                               >
                                 <div className="mb-2">
                                   <input
@@ -1516,9 +1516,7 @@ export default function ProjectTabs({
                 Existing Projections
               </h3>
               {projections.length === 0 ? (
-                <p className="text-white opacity-60">
-                  No projections yet
-                </p>
+                <p className="text-white opacity-60">No projections yet</p>
               ) : (
                 <div className="space-y-4">
                   {projections.map((proj) => {
@@ -1705,7 +1703,7 @@ export default function ProjectTabs({
                                     (email: any, idx: number) => (
                                       <div
                                         key={idx}
-                                        className="flex items-start justify-between p-3 bg-black dark:bg-black rounded border border-accent-olive"
+                                        className="flex items-start justify-between p-3 bg-black rounded border border-accent-olive"
                                       >
                                         <div className="flex-1">
                                           <div className="flex items-center gap-2">
@@ -1860,9 +1858,7 @@ export default function ProjectTabs({
                 All Projection Approvals
               </h3>
               {projections.length === 0 ? (
-                <p className="text-white opacity-60">
-                  No projections yet
-                </p>
+                <p className="text-white opacity-60">No projections yet</p>
               ) : (
                 <div className="space-y-6">
                   {projections.map((proj) => {
@@ -2028,7 +2024,7 @@ export default function ProjectTabs({
                                                       approval.status ===
                                                       "approved"
                                                         ? "bg-accent-olive text-white"
-                                                        : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-accent-olive hover:text-white"
+                                                        : "bg-gray-700 text-white hover:bg-accent-olive hover:text-white"
                                                     }`}
                                                   >
                                                     ✓ Approve
@@ -2046,7 +2042,7 @@ export default function ProjectTabs({
                                                       approval.status ===
                                                       "rejected"
                                                         ? "bg-red-500 text-white"
-                                                        : "bg-gray-200 dark:bg-gray-700 text-white hover:bg-red-500 hover:text-white"
+                                                        : "bg-gray-700 text-white hover:bg-red-500 hover:text-white"
                                                     }`}
                                                   >
                                                     ✗ Reject
@@ -2140,9 +2136,7 @@ export default function ProjectTabs({
                 Feature Requests
               </h3>
               {features.length === 0 ? (
-                <p className="text-white opacity-60">
-                  No feature requests yet
-                </p>
+                <p className="text-white opacity-60">No feature requests yet</p>
               ) : (
                 <div className="space-y-4">
                   {features.map((feature: any) => (
@@ -2220,7 +2214,7 @@ export default function ProjectTabs({
                     {users.map((user: any) => (
                       <label
                         key={user._id}
-                        className="flex items-center space-x-3 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded cursor-pointer"
+                        className="flex items-center space-x-3 p-2 hover:bg-gray-800 rounded cursor-pointer"
                       >
                         <input
                           type="checkbox"
@@ -2270,7 +2264,7 @@ export default function ProjectTabs({
                   setEmailMessage("");
                 }}
                 disabled={loading}
-                className="px-4 py-2 rounded-md border border-accent-olive text-white hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+                className="px-4 py-2 rounded-md border border-accent-olive text-white hover:bg-gray-800 disabled:opacity-50"
               >
                 Cancel
               </button>
