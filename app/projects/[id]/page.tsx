@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Suspense } from "react";
 import ProjectTabs from "./ProjectTabs";
 
 async function getProjectData(id: string) {
@@ -77,12 +78,20 @@ export default async function ProjectPage({
           )}
         </div>
 
-        <ProjectTabs
-          projectId={id}
-          currentUserId={session.user.id}
-          initialProjections={data.projections}
-          initialCheckpoints={data.checkpoints}
-        />
+        <Suspense
+          fallback={
+            <div className="text-center py-8 text-black dark:text-white">
+              Loading...
+            </div>
+          }
+        >
+          <ProjectTabs
+            projectId={id}
+            currentUserId={session.user.id}
+            initialProjections={data.projections}
+            initialCheckpoints={data.checkpoints}
+          />
+        </Suspense>
       </main>
     </div>
   );

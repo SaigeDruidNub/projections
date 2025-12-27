@@ -124,13 +124,16 @@ export async function POST(
 
     await Promise.all(
       users.map(async (user: any) => {
+        const notificationLink = `/projects/${projection.projectId}?tab=approvals&projection=${projectionId}`;
+        console.log("Creating notification with link:", notificationLink); // Debug log
+
         // Create in-app notification
         await Notification.create({
           userId: user._id,
           type: "approval_request",
           title: "New Approval Request",
           message: `You have been requested to approve the projection "${projection.name}" in project "${projectName}"`,
-          link: `/projects/${projection.projectId}`,
+          link: notificationLink,
         });
 
         // Send email notification

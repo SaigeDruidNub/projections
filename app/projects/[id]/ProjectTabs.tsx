@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Papa from "papaparse";
 
 interface ProjectTabsProps {
@@ -16,6 +17,7 @@ export default function ProjectTabs({
   initialProjections,
   initialCheckpoints,
 }: ProjectTabsProps) {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
     "projections" | "approvals" | "features"
   >("projections");
@@ -92,6 +94,34 @@ export default function ProjectTabs({
     "Week 4": [],
   });
   const [assumptions, setAssumptions] = useState<string[]>([""]);
+
+  // Check URL params for tab and projection on mount
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    const projectionId = searchParams.get("projection");
+
+    console.log("URL params:", { tab, projectionId }); // Debug log
+    console.log("Full URL:", window.location.href); // Debug log
+    console.log("Search string:", window.location.search); // Debug log
+
+    if (tab === "approvals") {
+      setActiveTab("approvals");
+      // Load approvals immediately if coming from notification
+      if (projections.length > 0) {
+        projections.forEach((proj) => {
+          if (!projectionApprovals[proj._id]) {
+            loadApprovals(proj._id);
+          }
+        });
+      }
+    } else if (tab === "features") {
+      setActiveTab("features");
+    }
+
+    if (projectionId && tab === "approvals") {
+      setSelectedProjection(projectionId);
+    }
+  }, [searchParams]);
 
   // Load users on mount
   useEffect(() => {
