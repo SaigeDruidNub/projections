@@ -63,6 +63,7 @@ export default function ProjectTabs({
     engineeringRate: "",
     bugFixesRate: "",
     appTestingRate: "",
+    isOverage: false,
   });
 
   // Change to array of weeks instead of fixed object
@@ -741,17 +742,21 @@ export default function ProjectTabs({
     try {
       const generatedCSV = generateHourlyProjectionCSV();
       const columnCount = generatedCSV.length > 0 ? generatedCSV[0].length : 0;
+      const finalName = hourlyForm.isOverage
+        ? `${projectionName} - Overage`
+        : projectionName;
 
       // Save directly to MongoDB
       const res = await fetch(`/api/projects/${projectId}/projections`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: projectionName,
+          name: finalName,
           data: generatedCSV,
-          filename: `${projectionName}.csv`,
+          filename: `${finalName}.csv`,
           rowCount: generatedCSV.length,
           columnCount: columnCount,
+          isOverage: hourlyForm.isOverage,
         }),
       });
 
@@ -769,6 +774,7 @@ export default function ProjectTabs({
           engineeringRate: "",
           bugFixesRate: "",
           appTestingRate: "",
+          isOverage: false,
         });
         // Reset weeks and projects
         setWeeks(["Week 1", "Week 2", "Week 3", "Week 4"]);
@@ -1143,7 +1149,7 @@ export default function ProjectTabs({
                               })
                             }
                             className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="75"
+                            placeholder="50"
                           />
                         </div>
                         <div>
@@ -1160,7 +1166,7 @@ export default function ProjectTabs({
                               })
                             }
                             className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="100"
+                            placeholder="175"
                           />
                         </div>
                         <div>
@@ -1177,7 +1183,7 @@ export default function ProjectTabs({
                               })
                             }
                             className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="85"
+                            placeholder="0"
                           />
                         </div>
                         <div>
@@ -1194,10 +1200,32 @@ export default function ProjectTabs({
                               })
                             }
                             className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-white dark:bg-black text-black dark:text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="65"
+                            placeholder="75"
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* Is Overage Checkbox */}
+                    <div className="flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-md">
+                      <input
+                        type="checkbox"
+                        id="isOverage"
+                        checked={hourlyForm.isOverage}
+                        onChange={(e) =>
+                          setHourlyForm({
+                            ...hourlyForm,
+                            isOverage: e.target.checked,
+                          })
+                        }
+                        className="w-4 h-4 text-accent-dark-orange focus:ring-accent-light-purple"
+                      />
+                      <label
+                        htmlFor="isOverage"
+                        className="text-sm font-medium text-black dark:text-white cursor-pointer"
+                      >
+                        Is Overage
+                      </label>
                     </div>
 
                     {/* Weekly Projects with Add/Remove Week buttons */}
@@ -1483,10 +1511,17 @@ export default function ProjectTabs({
                       ? (data[0] as any[])?.length || 0
                       : Object.keys(data[0] || {}).length;
 
+                    const isOverage =
+                      proj.isOverage || proj.name.includes("- Overage");
+
                     return (
                       <div
                         key={proj._id}
-                        className="rounded-lg bg-white dark:bg-black p-6 shadow border-2 border-accent-olive"
+                        className={`rounded-lg bg-white dark:bg-black p-6 shadow border-2 ${
+                          isOverage
+                            ? "border-accent-dark-orange"
+                            : "border-accent-olive"
+                        }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div>
@@ -1802,10 +1837,16 @@ export default function ProjectTabs({
                 <div className="space-y-6">
                   {projections.map((proj) => {
                     const approvals = projectionApprovals[proj._id] || [];
+                    const isOverage =
+                      proj.isOverage || proj.name.includes("- Overage");
+                    const borderColor = isOverage
+                      ? "border-accent-dark-orange"
+                      : "border-accent-olive";
+
                     return (
                       <div
                         key={proj._id}
-                        className="rounded-lg bg-white dark:bg-black p-6 shadow border-2 border-accent-olive"
+                        className={`rounded-lg bg-white dark:bg-black p-6 shadow border-2 ${borderColor}`}
                       >
                         <div className="flex items-start justify-between mb-4">
                           <div>
@@ -1859,7 +1900,7 @@ export default function ProjectTabs({
                                 return (
                                   <div
                                     key={reqNum}
-                                    className="border-2 border-accent-olive rounded-lg p-3"
+                                    className={`border-2 ${borderColor} rounded-lg p-3`}
                                   >
                                     <h5 className="text-sm font-semibold text-accent-light-purple mb-2">
                                       Request #{reqNum}
@@ -1900,7 +1941,7 @@ export default function ProjectTabs({
                                         .map((approval: any) => (
                                           <div
                                             key={approval._id}
-                                            className="flex items-center justify-between p-2 rounded border border-accent-olive bg-white dark:bg-black"
+                                            className={`flex items-center justify-between p-2 rounded border ${borderColor} bg-white dark:bg-black`}
                                           >
                                             <div className="flex items-center space-x-3 flex-1">
                                               {approval.user?.image && (

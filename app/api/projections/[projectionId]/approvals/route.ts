@@ -118,7 +118,8 @@ export async function POST(
     );
 
     // Send notifications to all users for this new approval request
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+    // Always use production URL for email links
+    const baseUrl = "https://projections-tawny.vercel.app";
     const approvalLink = `${baseUrl}/projects/${projection.projectId}?tab=approvals&projection=${projectionId}`;
 
     await Promise.all(

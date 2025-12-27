@@ -8,6 +8,7 @@ export interface IProjection {
   filename?: string; // Original CSV filename
   rowCount?: number; // Number of rows in the CSV
   columnCount?: number; // Number of columns in the CSV
+  isOverage?: boolean; // Whether this is an overage projection
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ const ProjectionSchema = new Schema<IProjection>(
     filename: { type: String },
     rowCount: { type: Number },
     columnCount: { type: Number },
+    isOverage: { type: Boolean, default: false },
   },
   {
     timestamps: true,
