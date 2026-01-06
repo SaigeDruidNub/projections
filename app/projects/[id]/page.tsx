@@ -1,8 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
 import ProjectTabs from "./ProjectTabs";
+import { Suspense } from "react";
+import ProjectPageClient from "./ProjectPageClient";
+// Removed dynamic import to fix build error
 
 async function getProjectData(id: string) {
   // Import models directly to avoid fetch timing issues
@@ -33,19 +35,23 @@ async function getProjectData(id: string) {
   }
 }
 
-export default async function ProjectPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+interface ProjectPageWrapperProps {
+  params: {
+    id: string;
+    [key: string]: any;
+  };
+}
+
+export default async function ProjectPageWrapper(
+  props: ProjectPageWrapperProps
+) {
   const session = await auth();
   if (!session) {
     redirect("/auth/signin");
   }
-
-  const { id } = await params;
+  const params = await props.params;
+  const { id } = params;
   const data = await getProjectData(id);
-
   if (!data) {
     return (
       <div className="min-h-screen bg-black py-12">
@@ -61,30 +67,17 @@ export default async function ProjectPage({
       </div>
     );
   }
+  return <ProjectPageClient data={data} id={id} />;
+}
 
-  return (
-    <div className="min-h-screen bg-black">
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">{data.project.name}</h1>
-          {data.project.description && (
-            <p className="mt-2 text-gray-300">{data.project.description}</p>
-          )}
-        </div>
-
-        <Suspense
-          fallback={
-            <div className="text-center py-8 text-white">Loading...</div>
-          }
-        >
-          <ProjectTabs
-            projectId={id}
-            currentUserId={session.user.id}
-            initialProjections={data.projections}
-            initialCheckpoints={data.checkpoints}
-          />
-        </Suspense>
-      </main>
-    </div>
-  );
+interface ProjectData {
+  project: {
+    _id: string;
+    name: string;
+    description?: string;
+    owner: string;
+    [key: string]: any;
+  };
+  projections: any[];
+  checkpoints: any[];
 }

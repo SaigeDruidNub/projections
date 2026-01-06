@@ -51,11 +51,11 @@ export default function ProjectTabs({
   const [projectionName, setProjectionName] = useState("");
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvFilename, setCsvFilename] = useState("");
-  const [creationMode, setCreationMode] = useState<"upload" | "hourly">(
-    "upload"
-  );
+  const [creationMode, setCreationMode] = useState<"upload" | "hourly">("upload");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [templateRows, setTemplateRows] = useState<any[][]>([]);
+  // Edit mode for projections
+  const [editProjectionId, setEditProjectionId] = useState<string | null>(null);
 
   // Hourly projection form state
   const [hourlyForm, setHourlyForm] = useState({
@@ -762,23 +762,22 @@ export default function ProjectTabs({
     return csvRows;
   };
 
-  const handleCreateHourlyProjection = async () => {
+  const handleCreateOrUpdateHourlyProjection = async () => {
     if (!projectionName || !hourlyForm.vendor || !hourlyForm.month) {
       alert("Please provide projection name, vendor, and month");
       return;
     }
-
     setLoading(true);
     try {
       const generatedCSV = generateHourlyProjectionCSV();
       const columnCount = generatedCSV.length > 0 ? generatedCSV[0].length : 0;
-      const finalName = hourlyForm.isOverage
-        ? `${projectionName} - Overage`
-        : projectionName;
-
-      // Save directly to MongoDB
-      const res = await fetch(`/api/projects/${projectId}/projections`, {
-        method: "POST",
+      const finalName = hourlyForm.isOverage ? `${projectionName} - Overage` : projectionName;
+      const method = editProjectionId ? "PUT" : "POST";
+      const url = editProjectionId
+        ? `/api/projections/${editProjectionId}`
+        : `/api/projects/${projectId}/projections`;
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: finalName,
@@ -789,14 +788,19 @@ export default function ProjectTabs({
           isOverage: hourlyForm.isOverage,
         }),
       });
-
       if (res.ok) {
-        const newProjection = await res.json();
-        setProjections([newProjection, ...projections]);
+        const updatedProjection = await res.json();
+        if (editProjectionId) {
+          setProjections(
+            projections.map((p) => (p._id === editProjectionId ? updatedProjection : p))
+          );
+          setEditProjectionId(null);
+        } else {
+          setProjections([updatedProjection, ...projections]);
+        }
         setProjectionName("");
         setCsvData([]);
         setCsvFilename("");
-        // Reset hourly form
         setHourlyForm({
           vendor: "",
           month: "",
@@ -806,7 +810,6 @@ export default function ProjectTabs({
           appTestingRate: "",
           isOverage: false,
         });
-        // Reset weeks and projects
         setWeeks(["Week 1", "Week 2", "Week 3", "Week 4"]);
         setWeeklyProjects({
           "Week 1": [],
@@ -815,13 +818,13 @@ export default function ProjectTabs({
           "Week 4": [],
         });
         setAssumptions([""]);
-        alert("Hourly projection created successfully!");
+        alert(editProjectionId ? "Hourly projection updated!" : "Hourly projection created successfully!");
       } else {
-        alert("Failed to create projection");
+        alert("Failed to save projection");
       }
     } catch (error) {
-      console.error("Error creating hourly projection:", error);
-      alert("Failed to create projection");
+      console.error("Error saving hourly projection:", error);
+      alert("Failed to save projection");
     } finally {
       setLoading(false);
     }
@@ -1488,13 +1491,19 @@ export default function ProjectTabs({
                       </div>
                     </div>
 
-                    {/* Generate Button */}
+                    {/* Generate/Update Button */}
                     <button
-                      onClick={handleCreateHourlyProjection}
+                      onClick={handleCreateOrUpdateHourlyProjection}
                       disabled={loading}
                       className="w-full rounded-md bg-accent-light-purple px-4 py-2 text-sm font-medium text-white hover:bg-accent-dark-orange disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {loading ? "Saving..." : "Save Hourly Projection"}
+                      {loading
+                        ? editProjectionId
+                          ? "Updating..."
+                          : "Saving..."
+                        : editProjectionId
+                        ? "Update Hourly Projection"
+                        : "Save Hourly Projection"}
                     </button>
                   </div>
                 ) : null}
@@ -1574,6 +1583,169 @@ export default function ProjectTabs({
                               className="rounded-md bg-accent-light-purple px-3 py-1 text-xs font-medium text-white hover:bg-accent-dark-orange transition-colors"
                             >
                               Download CSV
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCreationMode("hourly");
+                                setEditProjectionId(proj._id);
+                                setProjectionName(proj.name.replace(/ - Overage$/, ""));
+                                try {
+                                  const parsed = JSON.parse(proj.data);
+                                  // Parse vendor and month
+                                  const vendor = parsed[0]?.[2] || "";
+                                  const month = parsed[1]?.[2] || "";
+                                  // Parse rates: search for the row with 'Hourly Rates' and grab the next 4 rows
+                                  let commsRate = "";
+                                  let engineeringRate = "";
+                                  let bugFixesRate = "";
+                                  let appTestingRate = "";
+                                  for (let r = 0; r < parsed.length; r++) {
+                                    if (
+                                      parsed[r][1] &&
+                                      typeof parsed[r][1] === "string" &&
+                                      parsed[r][1].toLowerCase().includes("hourly rates")
+                                    ) {
+                                      commsRate = parsed[r + 1]?.[5]?.toString() || "";
+                                      engineeringRate = parsed[r + 2]?.[5]?.toString() || "";
+                                      bugFixesRate = parsed[r + 3]?.[5]?.toString() || "";
+                                      appTestingRate = parsed[r + 4]?.[5]?.toString() || "";
+                                      break;
+                                    }
+                                  }
+                                  // Fallback to old row numbers if not found
+                                  if (!commsRate && parsed[8]?.[5]) commsRate = parsed[8][5].toString();
+                                  if (!engineeringRate && parsed[9]?.[5]) engineeringRate = parsed[9][5].toString();
+                                  if (!bugFixesRate && parsed[10]?.[5]) bugFixesRate = parsed[10][5].toString();
+                                  if (!appTestingRate && parsed[11]?.[5]) appTestingRate = parsed[11][5].toString();
+
+                                  // Parse isOverage from name or field
+                                  const isOverage = proj.isOverage || /overage/i.test(proj.name);
+                                  setHourlyForm({
+                                    vendor,
+                                    month,
+                                    commsRate: commsRate !== undefined && commsRate !== null ? commsRate : "",
+                                    engineeringRate: engineeringRate !== undefined && engineeringRate !== null ? engineeringRate : "",
+                                    bugFixesRate: bugFixesRate !== undefined && bugFixesRate !== null ? bugFixesRate : "",
+                                    appTestingRate: appTestingRate !== undefined && appTestingRate !== null ? appTestingRate : "",
+                                    isOverage,
+                                  });
+
+                                  // Parse weeks and projects robustly, always include Week 1
+                                  const weekNames: string[] = [];
+                                  const weeklyProjects: any = {};
+                                  let foundWeek1 = false;
+                                  let i = 0;
+                                  // Find first week row
+                                  for (; i < parsed.length; i++) {
+                                    if (parsed[i][1] && /Week 1/.test(parsed[i][1])) {
+                                      foundWeek1 = true;
+                                      break;
+                                    }
+                                  }
+                                  if (!foundWeek1) {
+                                    // If Week 1 not found, default to 4 weeks
+                                    ["Week 1", "Week 2", "Week 3", "Week 4"].forEach((w) => {
+                                      weekNames.push(w);
+                                      weeklyProjects[w] = [];
+                                    });
+                                  } else {
+                                    // Parse all week sections
+                                    i = 0;
+                                    while (i < parsed.length) {
+                                      const row = parsed[i];
+                                      if (row && row[1] && /Week \d+/.test(row[1])) {
+                                        const weekName = row[1].split(" - ")[0];
+                                        if (!weekNames.includes(weekName)) {
+                                          weekNames.push(weekName);
+                                          weeklyProjects[weekName] = [];
+                                        }
+                                        i += 3; // skip headers
+                                        // Parse projects for this week
+                                        while (i < parsed.length) {
+                                          const prow = parsed[i];
+                                          // End of week section
+                                          if (prow && prow[3] && prow[3].toUpperCase().includes("TOTAL")) {
+                                            i++;
+                                            break;
+                                          }
+                                          // Next week section
+                                          if (prow && prow[1] && /Week \d+/.test(prow[1])) {
+                                            break;
+                                          }
+                                          // Skip empty rows
+                                          if (!prow || (!prow[1] && !prow[2] && !prow[3] && !prow[4] && !prow[5] && !prow[6] && !prow[7])) {
+                                            i++;
+                                            continue;
+                                          }
+                                          // Parse project name
+                                          const projectName = prow[1] || prow[2] || "";
+                                          // Parse objectives for this project
+                                          const objectives = [];
+                                          let j = i;
+                                          while (j < parsed.length) {
+                                            const orow = parsed[j];
+                                            // End of project or week
+                                            if ((orow && orow[3] && orow[3].toUpperCase().includes("TOTAL")) || (orow && orow[1] && /Week \d+/.test(orow[1]))) {
+                                              break;
+                                            }
+                                            // Skip empty rows
+                                            if (!orow || (!orow[1] && !orow[2] && !orow[3] && !orow[4] && !orow[5] && !orow[6] && !orow[7])) {
+                                              j++;
+                                              continue;
+                                            }
+                                            // Only push if at least one field is present
+                                            if (orow[2] || orow[4] || orow[5] || orow[6] || orow[7]) {
+                                              objectives.push({
+                                                description: orow[2] || "",
+                                                comms: orow[4] || "",
+                                                engineering: orow[5] || "",
+                                                bugFixes: orow[6] || "",
+                                                appTesting: orow[7] || "",
+                                              });
+                                            }
+                                            j++;
+                                          }
+                                          if (objectives.length > 0) {
+                                            weeklyProjects[weekName].push({
+                                              name: projectName,
+                                              objectives,
+                                            });
+                                          }
+                                          i = j;
+                                        }
+                                      } else {
+                                        i++;
+                                      }
+                                    }
+                                  }
+                                  // Always ensure at least Week 1 exists
+                                  if (!weekNames.includes("Week 1")) {
+                                    weekNames.unshift("Week 1");
+                                    weeklyProjects["Week 1"] = [];
+                                  }
+                                  setWeeks(weekNames);
+                                  setWeeklyProjects(weeklyProjects);
+
+                                  // Parse assumptions
+                                  const assumptionsStart = parsed.findIndex(
+                                    (row: any[]) => row[1] && (row[1] as string).toLowerCase() === "assumptions"
+                                  );
+                                  const assumptions: string[] = [];
+                                  if (assumptionsStart !== -1) {
+                                    for (let k = assumptionsStart + 1; k < parsed.length; k++) {
+                                      if (parsed[k][1]) {
+                                        assumptions.push(parsed[k][1]);
+                                      }
+                                    }
+                                  }
+                                  setAssumptions(assumptions.length ? assumptions : [""]);
+                                } catch (e) {
+                                  alert("Failed to parse projection data for editing");
+                                }
+                              }}
+                              className="rounded-md bg-accent-dark-orange px-3 py-1 text-xs font-medium text-white hover:bg-accent-light-orange transition-colors"
+                            >
+                              Edit
                             </button>
                           </div>
                         </div>
