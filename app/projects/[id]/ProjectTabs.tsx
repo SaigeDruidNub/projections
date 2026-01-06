@@ -17,9 +17,13 @@ export default function ProjectTabs({
   initialProjections,
   initialCheckpoints,
 }: ProjectTabsProps) {
+  // Projection type: 'financial' or 'project'
+  const [projectionType, setProjectionType] = useState<"financial" | "project">(
+    "financial"
+  );
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
-    "projections" | "approvals" | "features"
+    "projections" | "approvals" | "roles"
   >("projections");
   const [projections, setProjections] = useState(initialProjections);
   const [users, setUsers] = useState<any[]>([]);
@@ -51,7 +55,9 @@ export default function ProjectTabs({
   const [projectionName, setProjectionName] = useState("");
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvFilename, setCsvFilename] = useState("");
-  const [creationMode, setCreationMode] = useState<"upload" | "hourly">("upload");
+  const [creationMode, setCreationMode] = useState<"upload" | "hourly">(
+    "upload"
+  );
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [templateRows, setTemplateRows] = useState<any[][]>([]);
   // Edit mode for projections
@@ -114,8 +120,8 @@ export default function ProjectTabs({
           }
         });
       }
-    } else if (tab === "features") {
-      setActiveTab("features");
+    } else if (tab === "roles") {
+      setActiveTab("roles");
     }
 
     if (projectionId && tab === "approvals") {
@@ -771,7 +777,9 @@ export default function ProjectTabs({
     try {
       const generatedCSV = generateHourlyProjectionCSV();
       const columnCount = generatedCSV.length > 0 ? generatedCSV[0].length : 0;
-      const finalName = hourlyForm.isOverage ? `${projectionName} - Overage` : projectionName;
+      const finalName = hourlyForm.isOverage
+        ? `${projectionName} - Overage`
+        : projectionName;
       const method = editProjectionId ? "PUT" : "POST";
       const url = editProjectionId
         ? `/api/projections/${editProjectionId}`
@@ -792,7 +800,9 @@ export default function ProjectTabs({
         const updatedProjection = await res.json();
         if (editProjectionId) {
           setProjections(
-            projections.map((p) => (p._id === editProjectionId ? updatedProjection : p))
+            projections.map((p) =>
+              p._id === editProjectionId ? updatedProjection : p
+            )
           );
           setEditProjectionId(null);
         } else {
@@ -818,7 +828,11 @@ export default function ProjectTabs({
           "Week 4": [],
         });
         setAssumptions([""]);
-        alert(editProjectionId ? "Hourly projection updated!" : "Hourly projection created successfully!");
+        alert(
+          editProjectionId
+            ? "Hourly projection updated!"
+            : "Hourly projection created successfully!"
+        );
       } else {
         alert("Failed to save projection");
       }
@@ -1032,14 +1046,14 @@ export default function ProjectTabs({
             Approvals
           </button>
           <button
-            onClick={() => setActiveTab("features")}
-            className={`${
-              activeTab === "features"
+            onClick={() => setActiveTab("roles")}
+            className={`$ {
+              activeTab === "roles"
                 ? "border-accent-dark-orange text-accent-dark-orange"
                 : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
             } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
           >
-            Features
+            Roles
           </button>
         </nav>
       </div>
@@ -1087,6 +1101,24 @@ export default function ProjectTabs({
               </div>
 
               <div className="space-y-4">
+                {/* Projection Type Selector */}
+                <div>
+                  <label className="block text-sm font-medium text-white mb-1">
+                    Projection Type
+                  </label>
+                  <select
+                    value={projectionType}
+                    onChange={(e) =>
+                      setProjectionType(
+                        e.target.value as "financial" | "project"
+                      )
+                    }
+                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                  >
+                    <option value="financial">Financial Projection</option>
+                    <option value="project">Project Projection</option>
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-white">
                     Projection Name
@@ -1163,81 +1195,83 @@ export default function ProjectTabs({
                     </div>
 
                     {/* Hourly Rates */}
-                    <div className="p-4 bg-gray-900 rounded-md">
-                      <h4 className="text-sm font-semibold text-white mb-3">
-                        Hourly Rates ($)
-                      </h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                          <label className="block text-xs font-medium text-white mb-1">
-                            COMMS
-                          </label>
-                          <input
-                            type="number"
-                            value={hourlyForm.commsRate}
-                            onChange={(e) =>
-                              setHourlyForm({
-                                ...hourlyForm,
-                                commsRate: e.target.value,
-                              })
-                            }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="50"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-white mb-1">
-                            ENGINEERING
-                          </label>
-                          <input
-                            type="number"
-                            value={hourlyForm.engineeringRate}
-                            onChange={(e) =>
-                              setHourlyForm({
-                                ...hourlyForm,
-                                engineeringRate: e.target.value,
-                              })
-                            }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="175"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-white mb-1">
-                            BUG FIXES
-                          </label>
-                          <input
-                            type="number"
-                            value={hourlyForm.bugFixesRate}
-                            onChange={(e) =>
-                              setHourlyForm({
-                                ...hourlyForm,
-                                bugFixesRate: e.target.value,
-                              })
-                            }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="0"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-medium text-white mb-1">
-                            APP TESTING
-                          </label>
-                          <input
-                            type="number"
-                            value={hourlyForm.appTestingRate}
-                            onChange={(e) =>
-                              setHourlyForm({
-                                ...hourlyForm,
-                                appTestingRate: e.target.value,
-                              })
-                            }
-                            className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                            placeholder="75"
-                          />
+                    {projectionType === "financial" && (
+                      <div className="p-4 bg-gray-900 rounded-md">
+                        <h4 className="text-sm font-semibold text-white mb-3">
+                          Hourly Rates ($)
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-white mb-1">
+                              COMMS
+                            </label>
+                            <input
+                              type="number"
+                              value={hourlyForm.commsRate}
+                              onChange={(e) =>
+                                setHourlyForm({
+                                  ...hourlyForm,
+                                  commsRate: e.target.value,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                              placeholder="50"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-white mb-1">
+                              ENGINEERING
+                            </label>
+                            <input
+                              type="number"
+                              value={hourlyForm.engineeringRate}
+                              onChange={(e) =>
+                                setHourlyForm({
+                                  ...hourlyForm,
+                                  engineeringRate: e.target.value,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                              placeholder="175"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-white mb-1">
+                              BUG FIXES
+                            </label>
+                            <input
+                              type="number"
+                              value={hourlyForm.bugFixesRate}
+                              onChange={(e) =>
+                                setHourlyForm({
+                                  ...hourlyForm,
+                                  bugFixesRate: e.target.value,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-white mb-1">
+                              APP TESTING
+                            </label>
+                            <input
+                              type="number"
+                              value={hourlyForm.appTestingRate}
+                              onChange={(e) =>
+                                setHourlyForm({
+                                  ...hourlyForm,
+                                  appTestingRate: e.target.value,
+                                })
+                              }
+                              className="w-full px-2 py-1 text-sm rounded border-2 border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                              placeholder="75"
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Is Overage Checkbox */}
                     <div className="flex items-center gap-2 p-4 bg-gray-900 rounded-md">
@@ -1588,7 +1622,9 @@ export default function ProjectTabs({
                               onClick={() => {
                                 setCreationMode("hourly");
                                 setEditProjectionId(proj._id);
-                                setProjectionName(proj.name.replace(/ - Overage$/, ""));
+                                setProjectionName(
+                                  proj.name.replace(/ - Overage$/, "")
+                                );
                                 try {
                                   const parsed = JSON.parse(proj.data);
                                   // Parse vendor and month
@@ -1603,30 +1639,58 @@ export default function ProjectTabs({
                                     if (
                                       parsed[r][1] &&
                                       typeof parsed[r][1] === "string" &&
-                                      parsed[r][1].toLowerCase().includes("hourly rates")
+                                      parsed[r][1]
+                                        .toLowerCase()
+                                        .includes("hourly rates")
                                     ) {
-                                      commsRate = parsed[r + 1]?.[5]?.toString() || "";
-                                      engineeringRate = parsed[r + 2]?.[5]?.toString() || "";
-                                      bugFixesRate = parsed[r + 3]?.[5]?.toString() || "";
-                                      appTestingRate = parsed[r + 4]?.[5]?.toString() || "";
+                                      commsRate =
+                                        parsed[r + 1]?.[5]?.toString() || "";
+                                      engineeringRate =
+                                        parsed[r + 2]?.[5]?.toString() || "";
+                                      bugFixesRate =
+                                        parsed[r + 3]?.[5]?.toString() || "";
+                                      appTestingRate =
+                                        parsed[r + 4]?.[5]?.toString() || "";
                                       break;
                                     }
                                   }
                                   // Fallback to old row numbers if not found
-                                  if (!commsRate && parsed[8]?.[5]) commsRate = parsed[8][5].toString();
-                                  if (!engineeringRate && parsed[9]?.[5]) engineeringRate = parsed[9][5].toString();
-                                  if (!bugFixesRate && parsed[10]?.[5]) bugFixesRate = parsed[10][5].toString();
-                                  if (!appTestingRate && parsed[11]?.[5]) appTestingRate = parsed[11][5].toString();
+                                  if (!commsRate && parsed[8]?.[5])
+                                    commsRate = parsed[8][5].toString();
+                                  if (!engineeringRate && parsed[9]?.[5])
+                                    engineeringRate = parsed[9][5].toString();
+                                  if (!bugFixesRate && parsed[10]?.[5])
+                                    bugFixesRate = parsed[10][5].toString();
+                                  if (!appTestingRate && parsed[11]?.[5])
+                                    appTestingRate = parsed[11][5].toString();
 
                                   // Parse isOverage from name or field
-                                  const isOverage = proj.isOverage || /overage/i.test(proj.name);
+                                  const isOverage =
+                                    proj.isOverage ||
+                                    /overage/i.test(proj.name);
                                   setHourlyForm({
                                     vendor,
                                     month,
-                                    commsRate: commsRate !== undefined && commsRate !== null ? commsRate : "",
-                                    engineeringRate: engineeringRate !== undefined && engineeringRate !== null ? engineeringRate : "",
-                                    bugFixesRate: bugFixesRate !== undefined && bugFixesRate !== null ? bugFixesRate : "",
-                                    appTestingRate: appTestingRate !== undefined && appTestingRate !== null ? appTestingRate : "",
+                                    commsRate:
+                                      commsRate !== undefined &&
+                                      commsRate !== null
+                                        ? commsRate
+                                        : "",
+                                    engineeringRate:
+                                      engineeringRate !== undefined &&
+                                      engineeringRate !== null
+                                        ? engineeringRate
+                                        : "",
+                                    bugFixesRate:
+                                      bugFixesRate !== undefined &&
+                                      bugFixesRate !== null
+                                        ? bugFixesRate
+                                        : "",
+                                    appTestingRate:
+                                      appTestingRate !== undefined &&
+                                      appTestingRate !== null
+                                        ? appTestingRate
+                                        : "",
                                     isOverage,
                                   });
 
@@ -1637,14 +1701,22 @@ export default function ProjectTabs({
                                   let i = 0;
                                   // Find first week row
                                   for (; i < parsed.length; i++) {
-                                    if (parsed[i][1] && /Week 1/.test(parsed[i][1])) {
+                                    if (
+                                      parsed[i][1] &&
+                                      /Week 1/.test(parsed[i][1])
+                                    ) {
                                       foundWeek1 = true;
                                       break;
                                     }
                                   }
                                   if (!foundWeek1) {
                                     // If Week 1 not found, default to 4 weeks
-                                    ["Week 1", "Week 2", "Week 3", "Week 4"].forEach((w) => {
+                                    [
+                                      "Week 1",
+                                      "Week 2",
+                                      "Week 3",
+                                      "Week 4",
+                                    ].forEach((w) => {
                                       weekNames.push(w);
                                       weeklyProjects[w] = [];
                                     });
@@ -1653,7 +1725,11 @@ export default function ProjectTabs({
                                     i = 0;
                                     while (i < parsed.length) {
                                       const row = parsed[i];
-                                      if (row && row[1] && /Week \d+/.test(row[1])) {
+                                      if (
+                                        row &&
+                                        row[1] &&
+                                        /Week \d+/.test(row[1])
+                                      ) {
                                         const weekName = row[1].split(" - ")[0];
                                         if (!weekNames.includes(weekName)) {
                                           weekNames.push(weekName);
@@ -1664,37 +1740,81 @@ export default function ProjectTabs({
                                         while (i < parsed.length) {
                                           const prow = parsed[i];
                                           // End of week section
-                                          if (prow && prow[3] && prow[3].toUpperCase().includes("TOTAL")) {
+                                          if (
+                                            prow &&
+                                            prow[3] &&
+                                            prow[3]
+                                              .toUpperCase()
+                                              .includes("TOTAL")
+                                          ) {
                                             i++;
                                             break;
                                           }
                                           // Next week section
-                                          if (prow && prow[1] && /Week \d+/.test(prow[1])) {
+                                          if (
+                                            prow &&
+                                            prow[1] &&
+                                            /Week \d+/.test(prow[1])
+                                          ) {
                                             break;
                                           }
                                           // Skip empty rows
-                                          if (!prow || (!prow[1] && !prow[2] && !prow[3] && !prow[4] && !prow[5] && !prow[6] && !prow[7])) {
+                                          if (
+                                            !prow ||
+                                            (!prow[1] &&
+                                              !prow[2] &&
+                                              !prow[3] &&
+                                              !prow[4] &&
+                                              !prow[5] &&
+                                              !prow[6] &&
+                                              !prow[7])
+                                          ) {
                                             i++;
                                             continue;
                                           }
                                           // Parse project name
-                                          const projectName = prow[1] || prow[2] || "";
+                                          const projectName =
+                                            prow[1] || prow[2] || "";
                                           // Parse objectives for this project
                                           const objectives = [];
                                           let j = i;
                                           while (j < parsed.length) {
                                             const orow = parsed[j];
                                             // End of project or week
-                                            if ((orow && orow[3] && orow[3].toUpperCase().includes("TOTAL")) || (orow && orow[1] && /Week \d+/.test(orow[1]))) {
+                                            if (
+                                              (orow &&
+                                                orow[3] &&
+                                                orow[3]
+                                                  .toUpperCase()
+                                                  .includes("TOTAL")) ||
+                                              (orow &&
+                                                orow[1] &&
+                                                /Week \d+/.test(orow[1]))
+                                            ) {
                                               break;
                                             }
                                             // Skip empty rows
-                                            if (!orow || (!orow[1] && !orow[2] && !orow[3] && !orow[4] && !orow[5] && !orow[6] && !orow[7])) {
+                                            if (
+                                              !orow ||
+                                              (!orow[1] &&
+                                                !orow[2] &&
+                                                !orow[3] &&
+                                                !orow[4] &&
+                                                !orow[5] &&
+                                                !orow[6] &&
+                                                !orow[7])
+                                            ) {
                                               j++;
                                               continue;
                                             }
                                             // Only push if at least one field is present
-                                            if (orow[2] || orow[4] || orow[5] || orow[6] || orow[7]) {
+                                            if (
+                                              orow[2] ||
+                                              orow[4] ||
+                                              orow[5] ||
+                                              orow[6] ||
+                                              orow[7]
+                                            ) {
                                               objectives.push({
                                                 description: orow[2] || "",
                                                 comms: orow[4] || "",
@@ -1728,19 +1848,30 @@ export default function ProjectTabs({
 
                                   // Parse assumptions
                                   const assumptionsStart = parsed.findIndex(
-                                    (row: any[]) => row[1] && (row[1] as string).toLowerCase() === "assumptions"
+                                    (row: any[]) =>
+                                      row[1] &&
+                                      (row[1] as string).toLowerCase() ===
+                                        "assumptions"
                                   );
                                   const assumptions: string[] = [];
                                   if (assumptionsStart !== -1) {
-                                    for (let k = assumptionsStart + 1; k < parsed.length; k++) {
+                                    for (
+                                      let k = assumptionsStart + 1;
+                                      k < parsed.length;
+                                      k++
+                                    ) {
                                       if (parsed[k][1]) {
                                         assumptions.push(parsed[k][1]);
                                       }
                                     }
                                   }
-                                  setAssumptions(assumptions.length ? assumptions : [""]);
+                                  setAssumptions(
+                                    assumptions.length ? assumptions : [""]
+                                  );
                                 } catch (e) {
-                                  alert("Failed to parse projection data for editing");
+                                  alert(
+                                    "Failed to parse projection data for editing"
+                                  );
                                 }
                               }}
                               className="rounded-md bg-accent-dark-orange px-3 py-1 text-xs font-medium text-white hover:bg-accent-light-orange transition-colors"
@@ -1811,26 +1942,28 @@ export default function ProjectTabs({
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-accent-olive bg-black">
-                                    {data
-                                      .slice(0, 10)
-                                      .map((row: any, idx: number) => (
-                                        <tr key={idx}>
-                                          {Object.values(row).map(
-                                            (val: any, i: number) => (
-                                              <td
-                                                key={i}
-                                                className="px-4 py-2 text-white"
-                                              >
-                                                {val === "" ||
-                                                val === null ||
-                                                val === undefined
-                                                  ? ""
-                                                  : String(val)}
-                                              </td>
-                                            )
-                                          )}
-                                        </tr>
-                                      ))}
+                                    {Array.isArray(data)
+                                      ? data
+                                          .slice(0, 10)
+                                          .map((row: any, idx: number) => (
+                                            <tr key={idx}>
+                                              {Object.values(row).map(
+                                                (val: any, i: number) => (
+                                                  <td
+                                                    key={i}
+                                                    className="px-4 py-2 text-white"
+                                                  >
+                                                    {val === "" ||
+                                                    val === null ||
+                                                    val === undefined
+                                                      ? ""
+                                                      : String(val)}
+                                                  </td>
+                                                )
+                                              )}
+                                            </tr>
+                                          ))
+                                      : null}
                                   </tbody>
                                 </>
                               )}
@@ -1935,6 +2068,35 @@ export default function ProjectTabs({
                 </div>
               )}
             </div>
+          </div>
+        )}
+        {activeTab === "roles" && (
+          <div className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive">
+            <h3 className="mb-4 text-lg font-semibold text-white">Roles</h3>
+            <ul className="space-y-4">
+              <li className="p-4 bg-gray-900 rounded-md border border-accent-olive">
+                <h4 className="text-white font-semibold mb-1">
+                  Project Management
+                </h4>
+                <p className="text-white text-sm opacity-80">
+                  Responsible for planning, executing, and closing projects.
+                </p>
+              </li>
+              <li className="p-4 bg-gray-900 rounded-md border border-accent-olive">
+                <h4 className="text-white font-semibold mb-1">
+                  Finance Management
+                </h4>
+                <p className="text-white text-sm opacity-80">
+                  Oversees budgeting, accounting, and financial reporting.
+                </p>
+              </li>
+              <li className="p-4 bg-gray-900 rounded-md border border-accent-olive">
+                <h4 className="text-white font-semibold mb-1">Administrator</h4>
+                <p className="text-white text-sm opacity-80">
+                  Has full access to all system features and settings.
+                </p>
+              </li>
+            </ul>
           </div>
         )}
 
@@ -2251,97 +2413,6 @@ export default function ProjectTabs({
                       </div>
                     );
                   })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === "features" && (
-          <div className="space-y-8">
-            <div className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive">
-              <h3 className="mb-4 text-lg font-semibold text-white">
-                Request New Feature
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-white">
-                    Feature Name
-                  </label>
-                  <input
-                    type="text"
-                    value={featureForm.name}
-                    onChange={(e) =>
-                      setFeatureForm({ ...featureForm, name: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-white">
-                    Description
-                  </label>
-                  <textarea
-                    value={featureForm.description}
-                    onChange={(e) =>
-                      setFeatureForm({
-                        ...featureForm,
-                        description: e.target.value,
-                      })
-                    }
-                    rows={4}
-                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                  />
-                </div>
-                <button
-                  onClick={handleAddFeature}
-                  disabled={loading}
-                  className="rounded-md bg-accent-dark-orange px-4 py-2 text-sm font-medium text-white hover:bg-accent-light-orange disabled:opacity-50"
-                >
-                  {loading ? "Adding..." : "Request Feature"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-4 text-lg font-semibold text-white">
-                Feature Requests
-              </h3>
-              {features.length === 0 ? (
-                <p className="text-white opacity-60">No feature requests yet</p>
-              ) : (
-                <div className="space-y-4">
-                  {features.map((feature: any) => (
-                    <div
-                      key={feature._id}
-                      className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold text-white">
-                            {feature.name}
-                          </h4>
-                          <p className="mt-1 text-sm text-white opacity-70">
-                            {feature.description}
-                          </p>
-                          <p className="mt-2 text-xs text-white opacity-70">
-                            Status:{" "}
-                            <span
-                              className={`font-medium ${
-                                feature.status === "approved"
-                                  ? "text-accent-olive"
-                                  : feature.status === "pending"
-                                  ? "text-accent-light-orange"
-                                  : "text-white"
-                              }`}
-                            >
-                              {feature.status}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
