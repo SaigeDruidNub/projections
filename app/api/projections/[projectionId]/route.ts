@@ -5,15 +5,15 @@ import { Projection } from "@/lib/models";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { projectionId: string } }
+  { params }: { params: Promise<{ projectionId: string }> }
 ) {
+  const { projectionId } = await params;
   try {
     const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     await dbConnect();
-    const { projectionId } = await params;
     const body = await request.json();
     const { name, data, filename, rowCount, columnCount, isOverage } = body;
     if (!name || !data) {
