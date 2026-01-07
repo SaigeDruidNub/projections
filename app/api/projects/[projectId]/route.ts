@@ -5,7 +5,7 @@ import { Project, Projection, Checkpoint } from "@/lib/models";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,18 +13,18 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     await dbConnect();
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(projectId);
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    const projections = await Projection.find({ projectId: id }).sort({
+    const projections = await Projection.find({ projectId }).sort({
       createdAt: -1,
     });
-    const checkpoints = await Checkpoint.find({ projectId: id }).sort({
+    const checkpoints = await Checkpoint.find({ projectId }).sort({
       order: 1,
     });
 
@@ -44,7 +44,7 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -52,12 +52,12 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     const body = await request.json();
 
     await dbConnect();
     const project = await Project.findByIdAndUpdate(
-      id,
+      projectId,
       { $set: body },
       { new: true }
     );
@@ -78,7 +78,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -86,10 +86,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     await dbConnect();
 
-    const project = await Project.findByIdAndDelete(id);
+    const project = await Project.findByIdAndDelete(projectId);
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }

@@ -5,7 +5,7 @@ import { Projection, CheckpointProjection } from "@/lib/models";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,9 +13,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     await dbConnect();
-    const projections = await Projection.find({ projectId: id }).sort({
+    const projections = await Projection.find({ projectId }).sort({
       createdAt: -1,
     });
 
@@ -31,7 +31,7 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -39,7 +39,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     const body = await request.json();
     const { name, data, filename, rowCount, columnCount } = body;
 
@@ -52,7 +52,7 @@ export async function POST(
 
     await dbConnect();
     const projection = await Projection.create({
-      projectId: id,
+      projectId,
       name,
       data: JSON.stringify(data),
       filename,

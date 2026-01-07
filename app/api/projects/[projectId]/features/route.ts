@@ -5,7 +5,7 @@ import { Feature, FeatureApproval } from "@/lib/models";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -13,9 +13,9 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     await dbConnect();
-    const features = await Feature.find({ projectId: id }).sort({
+    const features = await Feature.find({ projectId }).sort({
       createdAt: -1,
     });
 
@@ -31,7 +31,7 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const session = await auth();
@@ -39,7 +39,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const { projectId } = await params;
     const body = await request.json();
     const { name, description } = body;
 
@@ -52,7 +52,7 @@ export async function POST(
 
     await dbConnect();
     const feature = await Feature.create({
-      projectId: id,
+      projectId,
       name,
       description,
     });

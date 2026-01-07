@@ -6,7 +6,7 @@ import { User } from "@/lib/models";
 
 export async function PATCH(
   req: Request,
-  context: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const session = await auth();
@@ -30,11 +30,7 @@ export async function PATCH(
       );
     }
 
-    // Defensive: unwrap params if it's a Promise (should not be in Next.js route handlers)
-    const userId =
-      context.params && typeof context.params.then === "function"
-        ? await context.params.then((p: any) => p.userId)
-        : context.params.userId;
+    const { userId } = await params;
 
     // Upsert the ProjectUser document
     const projectUser = await ProjectUser.findOneAndUpdate(
@@ -55,7 +51,7 @@ export async function PATCH(
 
 export async function GET(
   req: Request,
-  context: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const { searchParams } = new URL(req.url);
@@ -64,10 +60,7 @@ export async function GET(
       return NextResponse.json({ error: "Project required" }, { status: 400 });
     }
     await dbConnect();
-    const userId =
-      context.params && typeof context.params.then === "function"
-        ? await context.params.then((p: any) => p.userId)
-        : context.params.userId;
+    const { userId } = await params;
     const projectUser = await ProjectUser.findOne({
       userId,
       projectId,

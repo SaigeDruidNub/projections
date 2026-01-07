@@ -1055,7 +1055,6 @@ export default function ProjectTabs({
   return (
     <div>
       <div style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}>
-        Role debug: {String(currentUserProjectRole)}
       </div>
       <div className="border-b-2 border-accent-olive">
         <nav className="-mb-px flex space-x-8">
