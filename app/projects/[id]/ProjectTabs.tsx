@@ -122,6 +122,7 @@ export default function ProjectTabs({
         engineering: string;
         bugFixes: string;
         appTesting: string;
+        assumptions: string[];
       }>;
     }>;
   }>({
@@ -380,6 +381,7 @@ export default function ProjectTabs({
               engineering: "",
               bugFixes: "",
               appTesting: "",
+              assumptions: [],
             },
           ],
         },
@@ -439,6 +441,7 @@ export default function ProjectTabs({
       engineering: "",
       bugFixes: "",
       appTesting: "",
+      assumptions: [],
     });
     setWeeklyProjects({
       ...weeklyProjects,
@@ -473,6 +476,59 @@ export default function ProjectTabs({
       ...updated[projectIndex].objectives[objectiveIndex],
       [field]: value,
     };
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  const addObjectiveAssumption = (
+    week: string,
+    projectIndex: number,
+    objectiveIndex: number
+  ) => {
+    const updated = [...weeklyProjects[week]];
+    const currentAssumptions =
+      updated[projectIndex].objectives[objectiveIndex].assumptions || [];
+    updated[projectIndex].objectives[objectiveIndex].assumptions = [
+      ...currentAssumptions,
+      "",
+    ];
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  const removeObjectiveAssumption = (
+    week: string,
+    projectIndex: number,
+    objectiveIndex: number,
+    assumptionIndex: number
+  ) => {
+    const updated = [...weeklyProjects[week]];
+    updated[projectIndex].objectives[objectiveIndex].assumptions = updated[
+      projectIndex
+    ].objectives[objectiveIndex].assumptions.filter(
+      (_, i) => i !== assumptionIndex
+    );
+    setWeeklyProjects({
+      ...weeklyProjects,
+      [week]: updated,
+    });
+  };
+
+  const updateObjectiveAssumption = (
+    week: string,
+    projectIndex: number,
+    objectiveIndex: number,
+    assumptionIndex: number,
+    value: string
+  ) => {
+    const updated = [...weeklyProjects[week]];
+    updated[projectIndex].objectives[objectiveIndex].assumptions[
+      assumptionIndex
+    ] = value;
     setWeeklyProjects({
       ...weeklyProjects,
       [week]: updated,
@@ -666,7 +722,7 @@ export default function ProjectTabs({
         "",
         "Project Name",
         "Objective / Description",
-        "",
+        "Assumptions",
         "Type",
         "",
         "",
@@ -699,7 +755,7 @@ export default function ProjectTabs({
             "",
             objIdx === 0 ? project.name : "",
             objective.description,
-            "",
+            (objective.assumptions || []).join("\n"),
             objective.comms,
             objective.engineering,
             objective.bugFixes,
@@ -1057,8 +1113,9 @@ export default function ProjectTabs({
 
   return (
     <div>
-      <div style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}>
-      </div>
+      <div
+        style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}
+      ></div>
       <div className="border-b-2 border-accent-olive">
         <nav className="-mb-px flex space-x-8">
           {currentUserProjectRole && currentUserProjectRole !== "none" && (
@@ -1066,10 +1123,10 @@ export default function ProjectTabs({
               onClick={() => setActiveTab("projections")}
               className={`
                 ${
-                activeTab === "projections"
-                  ? "border-accent-dark-orange text-accent-dark-orange"
-                  : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
-              } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+                  activeTab === "projections"
+                    ? "border-accent-dark-orange text-accent-dark-orange"
+                    : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
+                } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
             >
               Projections
             </button>
@@ -1078,14 +1135,17 @@ export default function ProjectTabs({
             onClick={() => setActiveTab("approvals")}
             className={`
               ${
-              activeTab === "approvals"
-                ? "border-accent-dark-orange text-accent-dark-orange"
-                : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
-            } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+                activeTab === "approvals"
+                  ? "border-accent-dark-orange text-accent-dark-orange"
+                  : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
+              } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
           >
             Approvals
           </button>
-          {!(currentUserProjectRole === "project_manager" || currentUserProjectRole === "finance_manager") && (
+          {!(
+            currentUserProjectRole === "project_manager" ||
+            currentUserProjectRole === "finance_manager"
+          ) && (
             <button
               onClick={() => setActiveTab("roles")}
               className={`
@@ -1501,6 +1561,64 @@ export default function ProjectTabs({
                                             </div>
                                           ))}
                                         </div>
+
+                                        {/* Objective Assumptions */}
+                                        <div className="mt-2 space-y-2">
+                                          <div className="flex justify-between items-center">
+                                            <label className="text-xs font-medium text-white opacity-90">
+                                              Specific Assumptions
+                                            </label>
+                                            <button
+                                              onClick={() =>
+                                                addObjectiveAssumption(
+                                                  weekName,
+                                                  idx,
+                                                  objIdx
+                                                )
+                                              }
+                                              className="text-xs text-accent-light-purple hover:text-accent-dark-orange"
+                                            >
+                                              + Add
+                                            </button>
+                                          </div>
+                                          {(objective.assumptions || []).map(
+                                            (assumption, asmIdx) => (
+                                              <div
+                                                key={asmIdx}
+                                                className="flex gap-2"
+                                              >
+                                                <input
+                                                  type="text"
+                                                  value={assumption}
+                                                  onChange={(e) =>
+                                                    updateObjectiveAssumption(
+                                                      weekName,
+                                                      idx,
+                                                      objIdx,
+                                                      asmIdx,
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                  className="flex-1 px-2 py-1 text-xs rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                                                  placeholder="Detail specific assumption..."
+                                                />
+                                                <button
+                                                  onClick={() =>
+                                                    removeObjectiveAssumption(
+                                                      weekName,
+                                                      idx,
+                                                      objIdx,
+                                                      asmIdx
+                                                    )
+                                                  }
+                                                  className="text-red-500 hover:text-red-700 text-xs px-1"
+                                                >
+                                                  ✕
+                                                </button>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
                                       </div>
                                     )
                                   )}
@@ -1866,12 +1984,18 @@ export default function ProjectTabs({
                                               orow[6] ||
                                               orow[7]
                                             ) {
+                                              const assumptionStr = orow[3]
+                                                ? String(orow[3])
+                                                : "";
                                               objectives.push({
                                                 description: orow[2] || "",
                                                 comms: orow[4] || "",
                                                 engineering: orow[5] || "",
                                                 bugFixes: orow[6] || "",
                                                 appTesting: orow[7] || "",
+                                                assumptions: assumptionStr
+                                                  ? assumptionStr.split("\n")
+                                                  : [],
                                               });
                                             }
                                             j++;
