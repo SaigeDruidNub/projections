@@ -825,6 +825,7 @@ export default function ProjectTabs({
           rowCount: generatedCSV.length,
           columnCount: columnCount,
           isOverage: hourlyForm.isOverage,
+          type: projectionType,
         }),
       });
       if (res.ok) {
@@ -859,6 +860,7 @@ export default function ProjectTabs({
           "Week 4": [],
         });
         setAssumptions([""]);
+        setCreationMode("upload");
         alert(
           editProjectionId
             ? "Hourly projection updated!"
@@ -911,6 +913,7 @@ export default function ProjectTabs({
           filename: csvFilename,
           rowCount: csvData.length,
           columnCount: columnCount,
+          type: projectionType,
         }),
       });
 
@@ -1061,7 +1064,8 @@ export default function ProjectTabs({
           {currentUserProjectRole && currentUserProjectRole !== "none" && (
             <button
               onClick={() => setActiveTab("projections")}
-              className={`$
+              className={`
+                ${
                 activeTab === "projections"
                   ? "border-accent-dark-orange text-accent-dark-orange"
                   : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
@@ -1072,7 +1076,8 @@ export default function ProjectTabs({
           )}
           <button
             onClick={() => setActiveTab("approvals")}
-            className={`$
+            className={`
+              ${
               activeTab === "approvals"
                 ? "border-accent-dark-orange text-accent-dark-orange"
                 : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
@@ -1080,7 +1085,7 @@ export default function ProjectTabs({
           >
             Approvals
           </button>
-          {currentUserProjectRole !== "project_manager" && (
+          {!(currentUserProjectRole === "project_manager" || currentUserProjectRole === "finance_manager") && (
             <button
               onClick={() => setActiveTab("roles")}
               className={`
@@ -1122,42 +1127,46 @@ export default function ProjectTabs({
                 >
                   Upload CSV
                 </button>
-                <button
-                  onClick={() => {
-                    setCreationMode("hourly");
-                    setCsvData([]);
-                    setCsvFilename("");
-                    setSelectedTemplate("");
-                  }}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    creationMode === "hourly"
-                      ? "bg-accent-dark-orange text-white"
-                      : "bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
-                  }`}
-                >
-                  Hourly Projection
-                </button>
+                {currentUserProjectRole !== "project_manager" && (
+                  <button
+                    onClick={() => {
+                      setCreationMode("hourly");
+                      setCsvData([]);
+                      setCsvFilename("");
+                      setSelectedTemplate("");
+                    }}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      creationMode === "hourly"
+                        ? "bg-accent-dark-orange text-white"
+                        : "bg-gray-700 text-white hover:bg-accent-light-purple hover:text-white"
+                    }`}
+                  >
+                    Hourly Projection
+                  </button>
+                )}
               </div>
 
               <div className="space-y-4">
                 {/* Projection Type Selector */}
-                <div>
-                  <label className="block text-sm font-medium text-white mb-1">
-                    Projection Type
-                  </label>
-                  <select
-                    value={projectionType}
-                    onChange={(e) =>
-                      setProjectionType(
-                        e.target.value as "financial" | "project"
-                      )
-                    }
-                    className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
-                  >
-                    <option value="financial">Financial Projection</option>
-                    <option value="project">Project Projection</option>
-                  </select>
-                </div>
+                {currentUserProjectRole !== "project_manager" && (
+                  <div>
+                    <label className="block text-sm font-medium text-white mb-1">
+                      Projection Type
+                    </label>
+                    <select
+                      value={projectionType}
+                      onChange={(e) =>
+                        setProjectionType(
+                          e.target.value as "financial" | "project"
+                        )
+                      }
+                      className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
+                    >
+                      <option value="financial">Financial Projection</option>
+                      <option value="project">Project Projection</option>
+                    </select>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-white">
                     Projection Name
@@ -1601,7 +1610,10 @@ export default function ProjectTabs({
                 <p className="text-white opacity-60">No projections yet</p>
               ) : (
                 <div className="space-y-4">
-                  {projections.map((proj) => {
+                  {(currentUserProjectRole === "project_manager"
+                    ? projections.filter((proj) => proj.type !== "financial")
+                    : projections
+                  ).map((proj) => {
                     const data = JSON.parse(proj.data);
                     // Check if data is array-based (new format) or object-based (old format)
                     const isArrayFormat = Array.isArray(data[0]);

@@ -15,10 +15,11 @@ export async function PUT(
     }
     await dbConnect();
     const body = await request.json();
-    const { name, data, filename, rowCount, columnCount, isOverage } = body;
-    if (!name || !data) {
+    const { name, data, filename, rowCount, columnCount, isOverage, type } =
+      body;
+    if (!name || !data || !type) {
       return NextResponse.json(
-        { error: "Name and data are required" },
+        { error: "Name, data, and type are required" },
         { status: 400 }
       );
     }
@@ -40,6 +41,7 @@ export async function PUT(
         rowCount,
         columnCount,
         isOverage,
+        type,
       },
       { new: true }
     );

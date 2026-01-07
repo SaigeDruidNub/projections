@@ -41,11 +41,11 @@ export async function POST(
 
     const { projectId } = await params;
     const body = await request.json();
-    const { name, data, filename, rowCount, columnCount } = body;
+    const { name, data, filename, rowCount, columnCount, type } = body;
 
-    if (!name || !data) {
+    if (!name || !data || !type) {
       return NextResponse.json(
-        { error: "Name and data are required" },
+        { error: "Name, data, and type are required" },
         { status: 400 }
       );
     }
@@ -58,6 +58,7 @@ export async function POST(
       filename,
       rowCount,
       columnCount,
+      type,
     });
 
     return NextResponse.json(projection, { status: 201 });
