@@ -4,65 +4,69 @@ import ProjectForm from "../../components/ProjectForm";
 import { Suspense } from "react";
 import ProjectTabs from "./ProjectTabs";
 
+interface ProjectPageClientProps {
+  data: any;
+  id: string;
+  currentUserId: string;
+}
+
 export default function ProjectPageClient({
   data,
   id,
-}: {
-  data: any;
-  id: string;
-}) {
+  currentUserId,
+}: ProjectPageClientProps) {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [projectData, setProjectData] = useState(data);
   const handleEdit = () => setEditMode(true);
   const handleCancel = () => setEditMode(false);
 
-interface ProjectFormData {
+  interface ProjectFormData {
     name: string;
     description: string;
-}
+  }
 
-interface Project {
+  interface Project {
     name: string;
     description?: string;
     owner: string;
     // Add other fields as needed
-}
+  }
 
-interface ProjectData {
+  interface ProjectData {
     project: Project;
     projections: any; // Replace 'any' with a more specific type if available
     checkpoints: any; // Replace 'any' with a more specific type if available
-}
+  }
 
-type SetLoadingCb = (loading: boolean) => void;
+  type SetLoadingCb = (loading: boolean) => void;
 
-const handleUpdate = async (
+  const handleUpdate = async (
     formData: ProjectFormData,
     setLoadingCb: SetLoadingCb
-): Promise<void> => {
+  ): Promise<void> => {
     setLoading(true);
     setLoadingCb(true);
     try {
-        const res = await fetch(`/api/projects/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-        });
-        if (res.ok) {
-            const updated: Project = await res.json();
-            setProjectData({ ...projectData, project: updated });
-            setEditMode(false);
-        } else {
-            alert("Failed to update project");
-        }
-    } catch (error) {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        const updated: Project = await res.json();
+        setProjectData({ ...projectData, project: updated });
+        setEditMode(false);
+      } else {
         alert("Failed to update project");
+      }
+    } catch (error) {
+      alert("Failed to update project");
     } finally {
-        setLoading(false);
-        setLoadingCb(false);
+      setLoading(false);
+      setLoadingCb(false);
     }
-};
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -118,7 +122,7 @@ const handleUpdate = async (
         >
           <ProjectTabs
             projectId={id}
-            currentUserId={projectData.project.owner}
+            currentUserId={currentUserId}
             initialProjections={projectData.projections}
             initialCheckpoints={projectData.checkpoints}
           />

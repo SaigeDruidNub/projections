@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+
+const RolesTab = dynamic(() => import("./RolesTab"), { ssr: false });
 import { useSearchParams } from "next/navigation";
 import Papa from "papaparse";
 
@@ -17,6 +20,34 @@ export default function ProjectTabs({
   initialProjections,
   initialCheckpoints,
 }: ProjectTabsProps) {
+  // Dynamically fetch the user's project role for this project
+  const [currentUserProjectRole, setCurrentUserProjectRole] = useState<
+    "member" | "project_manager" | "finance_manager" | "admin" | "none" | null
+  >(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        // Adjust the API endpoint as needed to match your backend
+        const res = await fetch(
+          `/api/projects/${projectId}/users/${currentUserId}/role`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          // Expecting { role: "member" | "project_manager" | "finance_manager" | "admin" | "none" }
+          setCurrentUserProjectRole(data.role ?? "none");
+        } else {
+          setCurrentUserProjectRole("none"); // fallback
+        }
+      } catch (error) {
+        setCurrentUserProjectRole("none"); // fallback
+      }
+    };
+    if (projectId && currentUserId) {
+      fetchRole();
+    }
+  }, [projectId, currentUserId]);
+
   // Projection type: 'financial' or 'project'
   const [projectionType, setProjectionType] = useState<"financial" | "project">(
     "financial"
@@ -1023,21 +1054,26 @@ export default function ProjectTabs({
 
   return (
     <div>
+      <div style={{ color: "red", fontSize: "12px", marginBottom: "8px" }}>
+        Role debug: {String(currentUserProjectRole)}
+      </div>
       <div className="border-b-2 border-accent-olive">
         <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab("projections")}
-            className={`${
-              activeTab === "projections"
-                ? "border-accent-dark-orange text-accent-dark-orange"
-                : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
-            } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
-          >
-            Projections
-          </button>
+          {currentUserProjectRole && currentUserProjectRole !== "none" && (
+            <button
+              onClick={() => setActiveTab("projections")}
+              className={`$
+                activeTab === "projections"
+                  ? "border-accent-dark-orange text-accent-dark-orange"
+                  : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
+              } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+            >
+              Projections
+            </button>
+          )}
           <button
             onClick={() => setActiveTab("approvals")}
-            className={`${
+            className={`$
               activeTab === "approvals"
                 ? "border-accent-dark-orange text-accent-dark-orange"
                 : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
@@ -1045,16 +1081,20 @@ export default function ProjectTabs({
           >
             Approvals
           </button>
-          <button
-            onClick={() => setActiveTab("roles")}
-            className={`$ {
-              activeTab === "roles"
-                ? "border-accent-dark-orange text-accent-dark-orange"
-                : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
-            } whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
-          >
-            Roles
-          </button>
+          {currentUserProjectRole !== "project_manager" && (
+            <button
+              onClick={() => setActiveTab("roles")}
+              className={`
+                ${
+                  activeTab === "roles"
+                    ? "border-accent-dark-orange text-accent-dark-orange"
+                    : "border-transparent text-white hover:border-accent-olive hover:text-accent-light-purple"
+                }
+              whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium transition-colors`}
+            >
+              Roles
+            </button>
+          )}
         </nav>
       </div>
 
@@ -2010,24 +2050,11 @@ export default function ProjectTabs({
                                         key={idx}
                                         className="flex items-start justify-between p-3 bg-black rounded border border-accent-olive"
                                       >
-                                        <div className="flex-1">
-                                          <div className="flex items-center gap-2">
-                                            <span
-                                              className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                                                email.emailStatus === "sent"
-                                                  ? "bg-accent-olive text-white"
-                                                  : "bg-red-500 text-white"
-                                              }`}
-                                            >
-                                              {email.emailStatus === "sent"
-                                                ? "✓ Sent"
-                                                : "✗ Failed"}
-                                            </span>
-                                            <span className="text-sm font-medium text-white">
-                                              {email.recipientName ||
-                                                email.recipientEmail}
-                                            </span>
-                                          </div>
+                                        <div>
+                                          <span className="text-sm text-white font-semibold">
+                                            {email.recipientName ||
+                                              email.recipientEmail}
+                                          </span>
                                           {email.recipientName && (
                                             <p className="text-xs text-white opacity-60 mt-1">
                                               {email.recipientEmail}
@@ -2071,33 +2098,7 @@ export default function ProjectTabs({
           </div>
         )}
         {activeTab === "roles" && (
-          <div className="rounded-lg bg-black p-6 shadow border-2 border-accent-olive">
-            <h3 className="mb-4 text-lg font-semibold text-white">Roles</h3>
-            <ul className="space-y-4">
-              <li className="p-4 bg-gray-900 rounded-md border border-accent-olive">
-                <h4 className="text-white font-semibold mb-1">
-                  Project Management
-                </h4>
-                <p className="text-white text-sm opacity-80">
-                  Responsible for planning, executing, and closing projects.
-                </p>
-              </li>
-              <li className="p-4 bg-gray-900 rounded-md border border-accent-olive">
-                <h4 className="text-white font-semibold mb-1">
-                  Finance Management
-                </h4>
-                <p className="text-white text-sm opacity-80">
-                  Oversees budgeting, accounting, and financial reporting.
-                </p>
-              </li>
-              <li className="p-4 bg-gray-900 rounded-md border border-accent-olive">
-                <h4 className="text-white font-semibold mb-1">Administrator</h4>
-                <p className="text-white text-sm opacity-80">
-                  Has full access to all system features and settings.
-                </p>
-              </li>
-            </ul>
-          </div>
+          <RolesTab projectId={projectId} currentUserId={currentUserId} />
         )}
 
         {activeTab === "approvals" && (

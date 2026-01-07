@@ -67,7 +67,11 @@ export default async function ProjectPageWrapper(
       </div>
     );
   }
-  return <ProjectPageClient data={data} id={id} />;
+  // Pass the logged-in user's id from session to ProjectPageClient
+  const currentUserId = session.user?.id;
+  return (
+    <ProjectPageClient data={data} id={id} currentUserId={currentUserId} />
+  );
 }
 
 interface ProjectData {

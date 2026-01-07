@@ -4,6 +4,7 @@ import Link from "next/link";
 import Header from "@/app/components/Header";
 import dbConnect from "@/lib/mongodb";
 import { Project } from "@/lib/models";
+import { ProjectUser } from "@/lib/models/ProjectUser";
 
 async function getProjects() {
   const session = await auth();
@@ -12,7 +13,15 @@ async function getProjects() {
 
   try {
     await dbConnect();
-    const projects = await Project.find().sort({ createdAt: -1 }).lean();
+    // Find all project-user links for this user
+    const projectUsers = await ProjectUser.find({
+      userId: session.user.id,
+    }).lean();
+    const allowedProjectIds = projectUsers.map((pu) => pu.projectId.toString());
+    if (allowedProjectIds.length === 0) return [];
+    const projects = await Project.find({ _id: { $in: allowedProjectIds } })
+      .sort({ createdAt: -1 })
+      .lean();
 
     // Convert MongoDB documents to plain objects with string IDs
     return projects.map((project) => ({
@@ -42,9 +51,7 @@ export default async function Dashboard() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">
-            Projects
-          </h2>
+          <h2 className="text-2xl font-bold text-white">Projects</h2>
           <Link
             href="/projects/new"
             className="rounded-md bg-accent-dark-orange px-4 py-2 text-sm font-medium text-white hover:bg-accent-light-orange transition-colors"
@@ -86,4 +93,3 @@ export default async function Dashboard() {
     </div>
   );
 }
-

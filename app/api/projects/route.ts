@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import dbConnect from "@/lib/mongodb";
 import { Project } from "@/lib/models";
+import { ProjectUser } from "@/lib/models/ProjectUser";
 
 export async function GET() {
   try {
@@ -45,6 +46,13 @@ export async function POST(request: Request) {
       name,
       description,
       createdById: session.user.id,
+    });
+
+    // Automatically assign creator as Administrator in ProjectUser
+    await ProjectUser.create({
+      userId: project.createdById,
+      projectId: project._id,
+      role: "admin",
     });
 
     return NextResponse.json(project, { status: 201 });
