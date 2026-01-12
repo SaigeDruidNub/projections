@@ -1111,6 +1111,204 @@ export default function ProjectTabs({
     }
   };
 
+  const populateHourlyForm = (proj: any) => {
+    try {
+      if (proj.type) {
+        setProjectionType(proj.type);
+      }
+      const parsed = JSON.parse(proj.data);
+      // Parse vendor and month
+      const vendor = parsed[0]?.[2] || "";
+      const month = parsed[1]?.[2] || "";
+      // Parse rates: search for the row with 'Hourly Rates' and grab the next 4 rows
+      let commsRate = "";
+      let engineeringRate = "";
+      let bugFixesRate = "";
+      let appTestingRate = "";
+      for (let r = 0; r < parsed.length; r++) {
+        if (
+          parsed[r][1] &&
+          typeof parsed[r][1] === "string" &&
+          parsed[r][1].toLowerCase().includes("hourly rates")
+        ) {
+          commsRate = parsed[r + 1]?.[5]?.toString() || "";
+          engineeringRate = parsed[r + 2]?.[5]?.toString() || "";
+          bugFixesRate = parsed[r + 3]?.[5]?.toString() || "";
+          appTestingRate = parsed[r + 4]?.[5]?.toString() || "";
+          break;
+        }
+      }
+      // Fallback to old row numbers if not found
+      if (!commsRate && parsed[8]?.[5]) commsRate = parsed[8][5].toString();
+      if (!engineeringRate && parsed[9]?.[5])
+        engineeringRate = parsed[9][5].toString();
+      if (!bugFixesRate && parsed[10]?.[5])
+        bugFixesRate = parsed[10][5].toString();
+      if (!appTestingRate && parsed[11]?.[5])
+        appTestingRate = parsed[11][5].toString();
+
+      // Parse isOverage from name or field
+      const isOverage = proj.isOverage || /overage/i.test(proj.name);
+      setHourlyForm({
+        vendor,
+        month,
+        commsRate:
+          commsRate !== undefined && commsRate !== null ? commsRate : "",
+        engineeringRate:
+          engineeringRate !== undefined && engineeringRate !== null
+            ? engineeringRate
+            : "",
+        bugFixesRate:
+          bugFixesRate !== undefined && bugFixesRate !== null
+            ? bugFixesRate
+            : "",
+        appTestingRate:
+          appTestingRate !== undefined && appTestingRate !== null
+            ? appTestingRate
+            : "",
+        isOverage,
+      });
+
+      // Parse weeks and projects robustly, always include Week 1
+      const weekNames: string[] = [];
+      const weeklyProjects: any = {};
+      let foundWeek1 = false;
+      let i = 0;
+      // Find first week row
+      for (; i < parsed.length; i++) {
+        if (parsed[i][1] && /Week 1/.test(parsed[i][1])) {
+          foundWeek1 = true;
+          break;
+        }
+      }
+      if (!foundWeek1) {
+        // If Week 1 not found, default to 4 weeks
+        ["Week 1", "Week 2", "Week 3", "Week 4"].forEach((w) => {
+          weekNames.push(w);
+          weeklyProjects[w] = [];
+        });
+      } else {
+        // Parse all week sections
+        i = 0;
+        while (i < parsed.length) {
+          const row = parsed[i];
+          if (row && row[1] && /Week \d+/.test(row[1])) {
+            const weekName = row[1].split(" - ")[0];
+            if (!weekNames.includes(weekName)) {
+              weekNames.push(weekName);
+              weeklyProjects[weekName] = [];
+            }
+            i += 3; // skip headers
+            // Parse projects for this week
+            while (i < parsed.length) {
+              const prow = parsed[i];
+              // End of week section
+              if (prow && prow[3] && prow[3].toUpperCase().includes("TOTAL")) {
+                i++;
+                break;
+              }
+              // Next week section
+              if (prow && prow[1] && /Week \d+/.test(prow[1])) {
+                break;
+              }
+              // Skip empty rows
+              if (
+                !prow ||
+                (!prow[1] &&
+                  !prow[2] &&
+                  !prow[3] &&
+                  !prow[4] &&
+                  !prow[5] &&
+                  !prow[6] &&
+                  !prow[7])
+              ) {
+                i++;
+                continue;
+              }
+              // Parse project name
+              const projectName = prow[1] || prow[2] || "";
+              // Parse objectives for this project
+              const objectives = [];
+              let j = i;
+              while (j < parsed.length) {
+                const orow = parsed[j];
+                // End of project or week
+                if (
+                  (orow &&
+                    orow[3] &&
+                    orow[3].toUpperCase().includes("TOTAL")) ||
+                  (orow && orow[1] && /Week \d+/.test(orow[1]))
+                ) {
+                  break;
+                }
+                // Skip empty rows
+                if (
+                  !orow ||
+                  (!orow[1] &&
+                    !orow[2] &&
+                    !orow[3] &&
+                    !orow[4] &&
+                    !orow[5] &&
+                    !orow[6] &&
+                    !orow[7])
+                ) {
+                  j++;
+                  continue;
+                }
+                // Only push if at least one field is present
+                if (orow[2] || orow[4] || orow[5] || orow[6] || orow[7]) {
+                  const assumptionStr = orow[3] ? String(orow[3]) : "";
+                  objectives.push({
+                    description: orow[2] || "",
+                    comms: orow[4] || "",
+                    engineering: orow[5] || "",
+                    bugFixes: orow[6] || "",
+                    appTesting: orow[7] || "",
+                    assumptions: assumptionStr ? assumptionStr.split("\n") : [],
+                  });
+                }
+                j++;
+              }
+              if (objectives.length > 0) {
+                weeklyProjects[weekName].push({
+                  name: projectName,
+                  objectives,
+                });
+              }
+              i = j;
+            }
+          } else {
+            i++;
+          }
+        }
+      }
+      // Always ensure at least Week 1 exists
+      if (!weekNames.includes("Week 1")) {
+        weekNames.unshift("Week 1");
+        weeklyProjects["Week 1"] = [];
+      }
+      setWeeks(weekNames);
+      setWeeklyProjects(weeklyProjects);
+
+      // Parse assumptions
+      const assumptionsStart = parsed.findIndex(
+        (row: any[]) =>
+          row[1] && (row[1] as string).toLowerCase() === "assumptions"
+      );
+      const assumptions: string[] = [];
+      if (assumptionsStart !== -1) {
+        for (let k = assumptionsStart + 1; k < parsed.length; k++) {
+          if (parsed[k][1]) {
+            assumptions.push(parsed[k][1]);
+          }
+        }
+      }
+      setAssumptions(assumptions.length ? assumptions : [""]);
+    } catch (e) {
+      alert("Failed to parse projection data");
+    }
+  };
+
   return (
     <div>
       <div
@@ -1790,264 +1988,25 @@ export default function ProjectTabs({
                             <button
                               onClick={() => {
                                 setCreationMode("hourly");
+                                setEditProjectionId(null);
+                                setProjectionName(`${proj.name} (Copy)`);
+                                populateHourlyForm(proj);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                              className="rounded-md bg-accent-olive px-3 py-1 text-xs font-medium text-white hover:bg-accent-dark-orange transition-colors"
+                            >
+                              Copy
+                            </button>
+                            <button
+                              onClick={() => {
+                                setCreationMode("hourly");
                                 setEditProjectionId(proj._id);
                                 setProjectionName(
                                   proj.name.replace(/ - Overage$/, "")
                                 );
-                                try {
-                                  const parsed = JSON.parse(proj.data);
-                                  // Parse vendor and month
-                                  const vendor = parsed[0]?.[2] || "";
-                                  const month = parsed[1]?.[2] || "";
-                                  // Parse rates: search for the row with 'Hourly Rates' and grab the next 4 rows
-                                  let commsRate = "";
-                                  let engineeringRate = "";
-                                  let bugFixesRate = "";
-                                  let appTestingRate = "";
-                                  for (let r = 0; r < parsed.length; r++) {
-                                    if (
-                                      parsed[r][1] &&
-                                      typeof parsed[r][1] === "string" &&
-                                      parsed[r][1]
-                                        .toLowerCase()
-                                        .includes("hourly rates")
-                                    ) {
-                                      commsRate =
-                                        parsed[r + 1]?.[5]?.toString() || "";
-                                      engineeringRate =
-                                        parsed[r + 2]?.[5]?.toString() || "";
-                                      bugFixesRate =
-                                        parsed[r + 3]?.[5]?.toString() || "";
-                                      appTestingRate =
-                                        parsed[r + 4]?.[5]?.toString() || "";
-                                      break;
-                                    }
-                                  }
-                                  // Fallback to old row numbers if not found
-                                  if (!commsRate && parsed[8]?.[5])
-                                    commsRate = parsed[8][5].toString();
-                                  if (!engineeringRate && parsed[9]?.[5])
-                                    engineeringRate = parsed[9][5].toString();
-                                  if (!bugFixesRate && parsed[10]?.[5])
-                                    bugFixesRate = parsed[10][5].toString();
-                                  if (!appTestingRate && parsed[11]?.[5])
-                                    appTestingRate = parsed[11][5].toString();
-
-                                  // Parse isOverage from name or field
-                                  const isOverage =
-                                    proj.isOverage ||
-                                    /overage/i.test(proj.name);
-                                  setHourlyForm({
-                                    vendor,
-                                    month,
-                                    commsRate:
-                                      commsRate !== undefined &&
-                                      commsRate !== null
-                                        ? commsRate
-                                        : "",
-                                    engineeringRate:
-                                      engineeringRate !== undefined &&
-                                      engineeringRate !== null
-                                        ? engineeringRate
-                                        : "",
-                                    bugFixesRate:
-                                      bugFixesRate !== undefined &&
-                                      bugFixesRate !== null
-                                        ? bugFixesRate
-                                        : "",
-                                    appTestingRate:
-                                      appTestingRate !== undefined &&
-                                      appTestingRate !== null
-                                        ? appTestingRate
-                                        : "",
-                                    isOverage,
-                                  });
-
-                                  // Parse weeks and projects robustly, always include Week 1
-                                  const weekNames: string[] = [];
-                                  const weeklyProjects: any = {};
-                                  let foundWeek1 = false;
-                                  let i = 0;
-                                  // Find first week row
-                                  for (; i < parsed.length; i++) {
-                                    if (
-                                      parsed[i][1] &&
-                                      /Week 1/.test(parsed[i][1])
-                                    ) {
-                                      foundWeek1 = true;
-                                      break;
-                                    }
-                                  }
-                                  if (!foundWeek1) {
-                                    // If Week 1 not found, default to 4 weeks
-                                    [
-                                      "Week 1",
-                                      "Week 2",
-                                      "Week 3",
-                                      "Week 4",
-                                    ].forEach((w) => {
-                                      weekNames.push(w);
-                                      weeklyProjects[w] = [];
-                                    });
-                                  } else {
-                                    // Parse all week sections
-                                    i = 0;
-                                    while (i < parsed.length) {
-                                      const row = parsed[i];
-                                      if (
-                                        row &&
-                                        row[1] &&
-                                        /Week \d+/.test(row[1])
-                                      ) {
-                                        const weekName = row[1].split(" - ")[0];
-                                        if (!weekNames.includes(weekName)) {
-                                          weekNames.push(weekName);
-                                          weeklyProjects[weekName] = [];
-                                        }
-                                        i += 3; // skip headers
-                                        // Parse projects for this week
-                                        while (i < parsed.length) {
-                                          const prow = parsed[i];
-                                          // End of week section
-                                          if (
-                                            prow &&
-                                            prow[3] &&
-                                            prow[3]
-                                              .toUpperCase()
-                                              .includes("TOTAL")
-                                          ) {
-                                            i++;
-                                            break;
-                                          }
-                                          // Next week section
-                                          if (
-                                            prow &&
-                                            prow[1] &&
-                                            /Week \d+/.test(prow[1])
-                                          ) {
-                                            break;
-                                          }
-                                          // Skip empty rows
-                                          if (
-                                            !prow ||
-                                            (!prow[1] &&
-                                              !prow[2] &&
-                                              !prow[3] &&
-                                              !prow[4] &&
-                                              !prow[5] &&
-                                              !prow[6] &&
-                                              !prow[7])
-                                          ) {
-                                            i++;
-                                            continue;
-                                          }
-                                          // Parse project name
-                                          const projectName =
-                                            prow[1] || prow[2] || "";
-                                          // Parse objectives for this project
-                                          const objectives = [];
-                                          let j = i;
-                                          while (j < parsed.length) {
-                                            const orow = parsed[j];
-                                            // End of project or week
-                                            if (
-                                              (orow &&
-                                                orow[3] &&
-                                                orow[3]
-                                                  .toUpperCase()
-                                                  .includes("TOTAL")) ||
-                                              (orow &&
-                                                orow[1] &&
-                                                /Week \d+/.test(orow[1]))
-                                            ) {
-                                              break;
-                                            }
-                                            // Skip empty rows
-                                            if (
-                                              !orow ||
-                                              (!orow[1] &&
-                                                !orow[2] &&
-                                                !orow[3] &&
-                                                !orow[4] &&
-                                                !orow[5] &&
-                                                !orow[6] &&
-                                                !orow[7])
-                                            ) {
-                                              j++;
-                                              continue;
-                                            }
-                                            // Only push if at least one field is present
-                                            if (
-                                              orow[2] ||
-                                              orow[4] ||
-                                              orow[5] ||
-                                              orow[6] ||
-                                              orow[7]
-                                            ) {
-                                              const assumptionStr = orow[3]
-                                                ? String(orow[3])
-                                                : "";
-                                              objectives.push({
-                                                description: orow[2] || "",
-                                                comms: orow[4] || "",
-                                                engineering: orow[5] || "",
-                                                bugFixes: orow[6] || "",
-                                                appTesting: orow[7] || "",
-                                                assumptions: assumptionStr
-                                                  ? assumptionStr.split("\n")
-                                                  : [],
-                                              });
-                                            }
-                                            j++;
-                                          }
-                                          if (objectives.length > 0) {
-                                            weeklyProjects[weekName].push({
-                                              name: projectName,
-                                              objectives,
-                                            });
-                                          }
-                                          i = j;
-                                        }
-                                      } else {
-                                        i++;
-                                      }
-                                    }
-                                  }
-                                  // Always ensure at least Week 1 exists
-                                  if (!weekNames.includes("Week 1")) {
-                                    weekNames.unshift("Week 1");
-                                    weeklyProjects["Week 1"] = [];
-                                  }
-                                  setWeeks(weekNames);
-                                  setWeeklyProjects(weeklyProjects);
-
-                                  // Parse assumptions
-                                  const assumptionsStart = parsed.findIndex(
-                                    (row: any[]) =>
-                                      row[1] &&
-                                      (row[1] as string).toLowerCase() ===
-                                        "assumptions"
-                                  );
-                                  const assumptions: string[] = [];
-                                  if (assumptionsStart !== -1) {
-                                    for (
-                                      let k = assumptionsStart + 1;
-                                      k < parsed.length;
-                                      k++
-                                    ) {
-                                      if (parsed[k][1]) {
-                                        assumptions.push(parsed[k][1]);
-                                      }
-                                    }
-                                  }
-                                  setAssumptions(
-                                    assumptions.length ? assumptions : [""]
-                                  );
-                                } catch (e) {
-                                  alert(
-                                    "Failed to parse projection data for editing"
-                                  );
-                                }
+                                populateHourlyForm(proj);
+                                // Scroll to top to see logic
+                                window.scrollTo({ top: 0, behavior: "smooth" });
                               }}
                               className="rounded-md bg-accent-dark-orange px-3 py-1 text-xs font-medium text-white hover:bg-accent-light-orange transition-colors"
                             >
