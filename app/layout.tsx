@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   title: "Projections - Project Management & Approvals",
   description:
     "Manage projects, projections, checkpoints, and feature approvals",
+    icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
