@@ -43,13 +43,13 @@ export default function ProjectPageClient({
 
   const handleUpdate = async (
     formData: ProjectFormData,
-    setLoadingCb: SetLoadingCb
+    setLoadingCb: SetLoadingCb,
   ): Promise<void> => {
     setLoading(true);
     setLoadingCb(true);
     try {
       const res = await fetch(`/api/projects/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });

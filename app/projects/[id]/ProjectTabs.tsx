@@ -30,7 +30,7 @@ export default function ProjectTabs({
       try {
         // Adjust the API endpoint as needed to match your backend
         const res = await fetch(
-          `/api/projects/${projectId}/users/${currentUserId}/role`
+          `/api/projects/${projectId}/users/${currentUserId}/role`,
         );
         if (res.ok) {
           const data = await res.json();
@@ -50,7 +50,7 @@ export default function ProjectTabs({
 
   // Projection type: 'financial' or 'project'
   const [projectionType, setProjectionType] = useState<"financial" | "project">(
-    "financial"
+    "financial",
   );
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<
@@ -61,7 +61,7 @@ export default function ProjectTabs({
   const [features, setFeatures] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedProjection, setSelectedProjection] = useState<string | null>(
-    null
+    null,
   );
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [projectionApprovals, setProjectionApprovals] = useState<{
@@ -71,12 +71,12 @@ export default function ProjectTabs({
   // Email projection state
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [emailProjectionId, setEmailProjectionId] = useState<string | null>(
-    null
+    null,
   );
   const [emailSelectedUsers, setEmailSelectedUsers] = useState<string[]>([]);
   const [emailMessage, setEmailMessage] = useState("");
   const [emailHistory, setEmailHistory] = useState<{ [key: string]: any[] }>(
-    {}
+    {},
   );
   const [showEmailHistory, setShowEmailHistory] = useState<{
     [key: string]: boolean;
@@ -87,7 +87,7 @@ export default function ProjectTabs({
   const [csvData, setCsvData] = useState<any[]>([]);
   const [csvFilename, setCsvFilename] = useState("");
   const [creationMode, setCreationMode] = useState<"upload" | "hourly">(
-    "upload"
+    "upload",
   );
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [templateRows, setTemplateRows] = useState<any[][]>([]);
@@ -259,7 +259,7 @@ export default function ProjectTabs({
     setEmailSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
@@ -358,7 +358,7 @@ export default function ProjectTabs({
   const handleTemplateFieldChange = (
     rowIndex: number,
     colIndex: number,
-    value: string
+    value: string,
   ) => {
     const newRows = [...templateRows];
     newRows[rowIndex][colIndex] = value;
@@ -400,7 +400,7 @@ export default function ProjectTabs({
     week: string,
     index: number,
     field: string,
-    value: string
+    value: string,
   ) => {
     const updated = [...weeklyProjects[week]];
     updated[index] = { ...updated[index], [field]: value };
@@ -452,11 +452,11 @@ export default function ProjectTabs({
   const removeObjectiveFromProject = (
     week: string,
     projectIndex: number,
-    objectiveIndex: number
+    objectiveIndex: number,
   ) => {
     const updated = [...weeklyProjects[week]];
     updated[projectIndex].objectives = updated[projectIndex].objectives.filter(
-      (_, i) => i !== objectiveIndex
+      (_, i) => i !== objectiveIndex,
     );
     setWeeklyProjects({
       ...weeklyProjects,
@@ -469,7 +469,7 @@ export default function ProjectTabs({
     projectIndex: number,
     objectiveIndex: number,
     field: string,
-    value: string
+    value: string,
   ) => {
     const updated = [...weeklyProjects[week]];
     updated[projectIndex].objectives[objectiveIndex] = {
@@ -485,7 +485,7 @@ export default function ProjectTabs({
   const addObjectiveAssumption = (
     week: string,
     projectIndex: number,
-    objectiveIndex: number
+    objectiveIndex: number,
   ) => {
     const updated = [...weeklyProjects[week]];
     const currentAssumptions =
@@ -504,13 +504,13 @@ export default function ProjectTabs({
     week: string,
     projectIndex: number,
     objectiveIndex: number,
-    assumptionIndex: number
+    assumptionIndex: number,
   ) => {
     const updated = [...weeklyProjects[week]];
     updated[projectIndex].objectives[objectiveIndex].assumptions = updated[
       projectIndex
     ].objectives[objectiveIndex].assumptions.filter(
-      (_, i) => i !== assumptionIndex
+      (_, i) => i !== assumptionIndex,
     );
     setWeeklyProjects({
       ...weeklyProjects,
@@ -523,7 +523,7 @@ export default function ProjectTabs({
     projectIndex: number,
     objectiveIndex: number,
     assumptionIndex: number,
-    value: string
+    value: string,
   ) => {
     const updated = [...weeklyProjects[week]];
     updated[projectIndex].objectives[objectiveIndex].assumptions[
@@ -592,7 +592,7 @@ export default function ProjectTabs({
     weeks.forEach((weekName) => {
       const projectLines = weeklyProjects[weekName].reduce(
         (acc, p) => acc + p.objectives.length,
-        0
+        0,
       );
       const spacerLines = Math.max(0, 10 - weeklyProjects[weekName].length);
       // Header(3) + Projects + Spacers + TotalRow(1)
@@ -650,7 +650,7 @@ export default function ProjectTabs({
       label: string,
       colLetter: string, // 'E', 'F', 'G', or 'H'
       rate: string,
-      rowNum: number // 1-based row number for this summary row
+      rowNum: number, // 1-based row number for this summary row
     ) => {
       const weekCells = weeks.map((week) => {
         const targetRow = weekTotalRowIndices[week];
@@ -698,7 +698,7 @@ export default function ProjectTabs({
     ]);
     csvRows.push([
       "",
-      "COMMS",
+      "",
       ...weeks.map((w) => w.toUpperCase()),
       "",
       "",
@@ -712,13 +712,13 @@ export default function ProjectTabs({
     // Rows 8, 9, 10, 11
     csvRows.push(generateSummaryRow("COMMS", "E", hourlyForm.commsRate, 8));
     csvRows.push(
-      generateSummaryRow("ENGINEERING", "F", hourlyForm.engineeringRate, 9)
+      generateSummaryRow("ENGINEERING", "F", hourlyForm.engineeringRate, 9),
     );
     csvRows.push(
-      generateSummaryRow("BUG FIXES", "G", hourlyForm.bugFixesRate, 10)
+      generateSummaryRow("BUG FIXES", "G", hourlyForm.bugFixesRate, 10),
     );
     csvRows.push(
-      generateSummaryRow("APP TESTING", "H", hourlyForm.appTestingRate, 11)
+      generateSummaryRow("APP TESTING", "H", hourlyForm.appTestingRate, 11),
     );
 
     csvRows.push([]);
@@ -935,8 +935,8 @@ export default function ProjectTabs({
         if (editProjectionId) {
           setProjections(
             projections.map((p) =>
-              p._id === editProjectionId ? updatedProjection : p
-            )
+              p._id === editProjectionId ? updatedProjection : p,
+            ),
           );
           setEditProjectionId(null);
         } else {
@@ -966,7 +966,7 @@ export default function ProjectTabs({
         alert(
           editProjectionId
             ? "Hourly projection updated!"
-            : "Hourly projection created successfully!"
+            : "Hourly projection created successfully!",
         );
       } else {
         alert("Failed to save projection");
@@ -1027,7 +1027,7 @@ export default function ProjectTabs({
         setCsvFilename("");
         // Reset file input
         const fileInput = document.getElementById(
-          "csv-file"
+          "csv-file",
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = "";
       } else {
@@ -1055,7 +1055,7 @@ export default function ProjectTabs({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userIds: selectedUsers }),
-        }
+        },
       );
 
       if (res.ok) {
@@ -1068,7 +1068,7 @@ export default function ProjectTabs({
           .catch(() => ({ error: "Unknown error" }));
         console.error("API Error:", errorData);
         alert(
-          `Failed to request approvals: ${errorData.error || "Unknown error"}`
+          `Failed to request approvals: ${errorData.error || "Unknown error"}`,
         );
       }
     } catch (error) {
@@ -1095,7 +1095,7 @@ export default function ProjectTabs({
     setSelectedUsers((prev) =>
       prev.includes(userId)
         ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
+        : [...prev, userId],
     );
   };
 
@@ -1103,7 +1103,7 @@ export default function ProjectTabs({
     approvalId: string,
     status: "approved" | "rejected",
     projectionId: string,
-    comment?: string
+    comment?: string,
   ) => {
     setLoading(true);
     try {
@@ -1339,7 +1339,7 @@ export default function ProjectTabs({
       // Parse assumptions
       const assumptionsStart = parsed.findIndex(
         (row: any[]) =>
-          row[1] && (row[1] as string).toLowerCase() === "assumptions"
+          row[1] && (row[1] as string).toLowerCase() === "assumptions",
       );
       const assumptions: string[] = [];
       if (assumptionsStart !== -1) {
@@ -1522,7 +1522,7 @@ export default function ProjectTabs({
                       value={projectionType}
                       onChange={(e) =>
                         setProjectionType(
-                          e.target.value as "financial" | "project"
+                          e.target.value as "financial" | "project",
                         )
                       }
                       className="mt-1 block w-full rounded-md border-2 border-accent-olive px-3 py-2 bg-black text-white focus:border-accent-light-purple focus:outline-none"
@@ -1765,7 +1765,7 @@ export default function ProjectTabs({
                                         weekName,
                                         idx,
                                         "name",
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                     className="w-full px-2 py-1 text-sm rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
@@ -1804,7 +1804,7 @@ export default function ProjectTabs({
                                                 idx,
                                                 objIdx,
                                                 "description",
-                                                e.target.value
+                                                e.target.value,
                                               )
                                             }
                                             className="flex-1 px-2 py-1 text-sm rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
@@ -1818,7 +1818,7 @@ export default function ProjectTabs({
                                                 removeObjectiveFromProject(
                                                   weekName,
                                                   idx,
-                                                  objIdx
+                                                  objIdx,
                                                 )
                                               }
                                               className="text-red-500 hover:text-red-700 text-xs px-2"
@@ -1857,7 +1857,7 @@ export default function ProjectTabs({
                                                     idx,
                                                     objIdx,
                                                     key,
-                                                    e.target.value
+                                                    e.target.value,
                                                   )
                                                 }
                                                 className="w-full px-2 py-1 text-xs rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
@@ -1878,7 +1878,7 @@ export default function ProjectTabs({
                                                 addObjectiveAssumption(
                                                   weekName,
                                                   idx,
-                                                  objIdx
+                                                  objIdx,
                                                 )
                                               }
                                               className="text-xs text-accent-light-purple hover:text-accent-dark-orange"
@@ -1901,7 +1901,7 @@ export default function ProjectTabs({
                                                       idx,
                                                       objIdx,
                                                       asmIdx,
-                                                      e.target.value
+                                                      e.target.value,
                                                     )
                                                   }
                                                   className="flex-1 px-2 py-1 text-xs rounded border border-accent-olive bg-black text-white focus:border-accent-light-purple focus:outline-none"
@@ -1913,7 +1913,7 @@ export default function ProjectTabs({
                                                       weekName,
                                                       idx,
                                                       objIdx,
-                                                      asmIdx
+                                                      asmIdx,
                                                     )
                                                   }
                                                   className="text-red-500 hover:text-red-700 text-xs px-1"
@@ -1921,11 +1921,11 @@ export default function ProjectTabs({
                                                   ✕
                                                 </button>
                                               </div>
-                                            )
+                                            ),
                                           )}
                                         </div>
                                       </div>
-                                    )
+                                    ),
                                   )}
                                 </div>
                                 <button
@@ -2007,8 +2007,8 @@ export default function ProjectTabs({
                           ? "Updating..."
                           : "Saving..."
                         : editProjectionId
-                        ? "Update Hourly Projection"
-                        : "Save Hourly Projection"}
+                          ? "Update Hourly Projection"
+                          : "Save Hourly Projection"}
                     </button>
                   </div>
                 ) : null}
@@ -2109,7 +2109,7 @@ export default function ProjectTabs({
                                 setCreationMode("hourly");
                                 setEditProjectionId(proj._id);
                                 setProjectionName(
-                                  proj.name.replace(/ - Overage$/, "")
+                                  proj.name.replace(/ - Overage$/, ""),
                                 );
                                 populateHourlyForm(proj);
                                 // Scroll to top to see logic
@@ -2134,7 +2134,7 @@ export default function ProjectTabs({
                               {isArrayFormat ? (
                                 <tbody className="divide-y divide-accent-olive bg-black">
                                   {data
-                                    .slice(0, 10)
+                                    .slice(0, 11)
                                     .map((row: any[], idx: number) => (
                                       <tr
                                         key={idx}
@@ -2151,10 +2151,10 @@ export default function ProjectTabs({
                                               idx === 0
                                                 ? "font-medium text-white"
                                                 : cell === "" ||
-                                                  cell === null ||
-                                                  cell === undefined
-                                                ? "text-gray-400"
-                                                : "text-white"
+                                                    cell === null ||
+                                                    cell === undefined
+                                                  ? "text-gray-400"
+                                                  : "text-white"
                                             }`}
                                           >
                                             {cell === "" ||
@@ -2162,9 +2162,13 @@ export default function ProjectTabs({
                                             cell === undefined
                                               ? ""
                                               : typeof cell === "string" &&
-                                                cell.startsWith("=")
-                                              ? evaluateFormula(cell, row, data)
-                                              : String(cell)}
+                                                  cell.startsWith("=")
+                                                ? evaluateFormula(
+                                                    cell,
+                                                    row,
+                                                    data,
+                                                  )
+                                                : String(cell)}
                                           </td>
                                         ))}
                                       </tr>
@@ -2188,7 +2192,7 @@ export default function ProjectTabs({
                                   <tbody className="divide-y divide-accent-olive bg-black">
                                     {Array.isArray(data)
                                       ? data
-                                          .slice(0, 10)
+                                          .slice(0, 11)
                                           .map((row: any, idx: number) => (
                                             <tr key={idx}>
                                               {Object.values(row).map(
@@ -2203,7 +2207,7 @@ export default function ProjectTabs({
                                                       ? ""
                                                       : String(val)}
                                                   </td>
-                                                )
+                                                ),
                                               )}
                                             </tr>
                                           ))
@@ -2212,9 +2216,9 @@ export default function ProjectTabs({
                                 </>
                               )}
                             </table>
-                            {data.length > 10 && (
+                            {data.length > 11 && (
                               <p className="mt-2 text-sm text-white opacity-70">
-                                Showing 10 of {data.length} rows
+                                Showing 11 of {data.length} rows
                               </p>
                             )}
                           </div>
@@ -2282,11 +2286,11 @@ export default function ProjectTabs({
                                         </div>
                                         <span className="text-xs text-white opacity-60 whitespace-nowrap ml-4">
                                           {new Date(
-                                            email.createdAt
+                                            email.createdAt,
                                           ).toLocaleString()}
                                         </span>
                                       </div>
-                                    )
+                                    ),
                                   )}
                                 </div>
                               )}
@@ -2449,12 +2453,12 @@ export default function ProjectTabs({
                                   acc[reqNum].push(approval);
                                   return acc;
                                 },
-                                {}
+                                {},
                               );
 
                               // Sort request numbers descending (latest first)
                               const sortedRequestNumbers = Object.keys(
-                                groupedApprovals
+                                groupedApprovals,
                               )
                                 .map(Number)
                                 .sort((a, b) => b - a);
@@ -2532,17 +2536,17 @@ export default function ProjectTabs({
                                                     "approved" &&
                                                   approval.approvedAt
                                                     ? `Approved ${new Date(
-                                                        approval.approvedAt
+                                                        approval.approvedAt,
                                                       ).toLocaleString()}`
                                                     : approval.status ===
-                                                        "rejected" &&
-                                                      approval.rejectedAt
-                                                    ? `Rejected ${new Date(
+                                                          "rejected" &&
                                                         approval.rejectedAt
-                                                      ).toLocaleString()}`
-                                                    : `Requested ${new Date(
-                                                        approval.createdAt
-                                                      ).toLocaleString()}`}
+                                                      ? `Rejected ${new Date(
+                                                          approval.rejectedAt,
+                                                        ).toLocaleString()}`
+                                                      : `Requested ${new Date(
+                                                          approval.createdAt,
+                                                        ).toLocaleString()}`}
                                                 </p>
                                               </div>
                                             </div>
@@ -2555,7 +2559,7 @@ export default function ProjectTabs({
                                                       handleApprovalAction(
                                                         approval._id,
                                                         "approved",
-                                                        proj._id
+                                                        proj._id,
                                                       )
                                                     }
                                                     disabled={loading}
@@ -2573,7 +2577,7 @@ export default function ProjectTabs({
                                                       handleApprovalAction(
                                                         approval._id,
                                                         "rejected",
-                                                        proj._id
+                                                        proj._id,
                                                       )
                                                     }
                                                     disabled={loading}
@@ -2594,9 +2598,9 @@ export default function ProjectTabs({
                                                     "approved"
                                                       ? "bg-accent-olive text-white"
                                                       : approval.status ===
-                                                        "rejected"
-                                                      ? "bg-red-500 text-white"
-                                                      : "bg-accent-light-orange text-white"
+                                                          "rejected"
+                                                        ? "bg-red-500 text-white"
+                                                        : "bg-accent-light-orange text-white"
                                                   }`}
                                                 >
                                                   {approval.status
