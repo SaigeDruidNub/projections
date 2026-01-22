@@ -34,10 +34,8 @@ async function makeAdmin() {
   }
 
   try {
-    console.log("Connecting to database...");
-    await dbConnect();
-    console.log("Connected to database");
-
+   await dbConnect();
+    
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -48,7 +46,6 @@ async function makeAdmin() {
     user.isAdmin = true;
     await user.save();
 
-    console.log(`✓ User "${user.name || email}" is now an admin`);
     process.exit(0);
   } catch (error) {
     console.error("Error:", error);

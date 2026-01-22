@@ -138,10 +138,7 @@ export default function ProjectTabs({
     const tab = searchParams.get("tab");
     const projectionId = searchParams.get("projection");
 
-    console.log("URL params:", { tab, projectionId }); // Debug log
-    console.log("Full URL:", window.location.href); // Debug log
-    console.log("Search string:", window.location.search); // Debug log
-
+    
     if (tab === "approvals") {
       setActiveTab("approvals");
       // Load approvals immediately if coming from notification

@@ -134,7 +134,7 @@ export default function NotificationBell() {
                     <Link
                       href={notification.link || "#"}
                       onClick={() => {
-                        console.log("Notification clicked:", notification.link); // Debug log
+                        
                         if (!notification.read) {
                           markAsRead(notification._id);
                         }

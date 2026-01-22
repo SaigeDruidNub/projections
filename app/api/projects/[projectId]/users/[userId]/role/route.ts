@@ -33,17 +33,12 @@ export async function GET(
     const userObjectId = mongoose.Types.ObjectId.isValid(userId)
       ? new mongoose.Types.ObjectId(userId)
       : userId;
-    console.log("[API DEBUG] Params:", {
-      projectId,
-      userId,
-      projectObjectId,
-      userObjectId,
-    });
+    
     const projectUser: ProjectUserDoc | null = await ProjectUser.findOne({
       projectId: projectObjectId,
       userId: userObjectId,
     }).lean();
-    console.log("[API DEBUG] ProjectUser found:", projectUser);
+    
     if (!projectUser) {
       return NextResponse.json({ role: "none" }, { status: 200 });
     }

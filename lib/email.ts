@@ -43,16 +43,8 @@ export async function sendEmail({
 
   // If no transporter (credentials not set), just log
   if (!transporter) {
-    console.log("📧 Email would be sent:");
-    console.log("To:", to);
-    console.log("Subject:", subject);
-    console.log("Body preview:", html.substring(0, 200) + "...");
     if (attachments && attachments.length > 0) {
-      console.log(
-        "Attachments:",
-        attachments.map((a) => a.filename).join(", ")
-      );
-    }
+      }
     return { success: true, mode: "development" };
   }
 
@@ -66,14 +58,10 @@ export async function sendEmail({
       attachments: attachments || [],
     });
 
-    console.log("✅ Email sent successfully:", info.messageId);
     return { success: true, messageId: info.messageId, mode: "production" };
   } catch (error: any) {
     console.error("❌ Error sending email:", error.message);
     // Fallback to logging if email fails
-    console.log("📧 Email details (failed to send):");
-    console.log("To:", to);
-    console.log("Subject:", subject);
     throw new Error(`Failed to send email: ${error.message}`);
   }
 }

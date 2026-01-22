@@ -125,8 +125,7 @@ export async function POST(
     await Promise.all(
       users.map(async (user: any) => {
         const notificationLink = `/projects/${projection.projectId}?tab=approvals&projection=${projectionId}`;
-        console.log("Creating notification with link:", notificationLink); // Debug log
-
+        
         // Create in-app notification
         await Notification.create({
           userId: user._id,
