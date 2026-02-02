@@ -138,7 +138,6 @@ export default function ProjectTabs({
     const tab = searchParams.get("tab");
     const projectionId = searchParams.get("projection");
 
-    
     if (tab === "approvals") {
       setActiveTab("approvals");
       // Load approvals immediately if coming from notification
@@ -1181,7 +1180,6 @@ export default function ProjectTabs({
           break;
         }
       }
-      // Fallback to old row numbers if not found
       if (!commsRate && parsed[8]?.[5]) commsRate = parsed[8][5].toString();
       if (!engineeringRate && parsed[9]?.[5])
         engineeringRate = parsed[9][5].toString();
@@ -1225,13 +1223,11 @@ export default function ProjectTabs({
         }
       }
       if (!foundWeek1) {
-        // If Week 1 not found, default to 4 weeks
         ["Week 1", "Week 2", "Week 3", "Week 4"].forEach((w) => {
           weekNames.push(w);
           weeklyProjects[w] = [];
         });
       } else {
-        // Parse all week sections
         i = 0;
         while (i < parsed.length) {
           const row = parsed[i];
@@ -1242,16 +1238,24 @@ export default function ProjectTabs({
               weeklyProjects[weekName] = [];
             }
             i += 3; // skip headers
-            // Parse projects for this week
+            let currentProject: any = null;
             while (i < parsed.length) {
               const prow = parsed[i];
               // End of week section
               if (prow && prow[3] && prow[3].toUpperCase().includes("TOTAL")) {
+                if (currentProject) {
+                  weeklyProjects[weekName].push(currentProject);
+                  currentProject = null;
+                }
                 i++;
                 break;
               }
               // Next week section
               if (prow && prow[1] && /Week \d+/.test(prow[1])) {
+                if (currentProject) {
+                  weeklyProjects[weekName].push(currentProject);
+                  currentProject = null;
+                }
                 break;
               }
               // Skip empty rows
@@ -1268,64 +1272,53 @@ export default function ProjectTabs({
                 i++;
                 continue;
               }
-              // Parse project name
-              const projectName = prow[1] || prow[2] || "";
-              // Parse objectives for this project
-              const objectives = [];
-              let j = i;
-              while (j < parsed.length) {
-                const orow = parsed[j];
-                // End of project or week
-                if (
-                  (orow &&
-                    orow[3] &&
-                    orow[3].toUpperCase().includes("TOTAL")) ||
-                  (orow && orow[1] && /Week \d+/.test(orow[1]))
-                ) {
-                  break;
+              // If this row is a new project (has a name in col 1)
+              if (prow[1] && prow[1].toString().trim() !== "") {
+                if (currentProject) {
+                  weeklyProjects[weekName].push(currentProject);
                 }
-                // Skip empty rows
-                if (
-                  !orow ||
-                  (!orow[1] &&
-                    !orow[2] &&
-                    !orow[3] &&
-                    !orow[4] &&
-                    !orow[5] &&
-                    !orow[6] &&
-                    !orow[7])
-                ) {
-                  j++;
-                  continue;
-                }
-                // Only push if at least one field is present
-                if (orow[2] || orow[4] || orow[5] || orow[6] || orow[7]) {
-                  const assumptionStr = orow[3] ? String(orow[3]) : "";
-                  objectives.push({
-                    description: orow[2] || "",
-                    comms: orow[4] || "",
-                    engineering: orow[5] || "",
-                    bugFixes: orow[6] || "",
-                    appTesting: orow[7] || "",
+                currentProject = {
+                  name: prow[1],
+                  objectives: [],
+                };
+                // If this row also has objective data, add as first objective
+                if (prow[2] || prow[4] || prow[5] || prow[6] || prow[7]) {
+                  const assumptionStr = prow[3] ? String(prow[3]) : "";
+                  currentProject.objectives.push({
+                    description: prow[2] || "",
+                    comms: prow[4] || "",
+                    engineering: prow[5] || "",
+                    bugFixes: prow[6] || "",
+                    appTesting: prow[7] || "",
                     assumptions: assumptionStr ? assumptionStr.split("\n") : [],
                   });
                 }
-                j++;
-              }
-              if (objectives.length > 0) {
-                weeklyProjects[weekName].push({
-                  name: projectName,
-                  objectives,
+              } else if (
+                currentProject &&
+                (prow[2] || prow[4] || prow[5] || prow[6] || prow[7])
+              ) {
+                // This is an objective row for the current project
+                const assumptionStr = prow[3] ? String(prow[3]) : "";
+                currentProject.objectives.push({
+                  description: prow[2] || "",
+                  comms: prow[4] || "",
+                  engineering: prow[5] || "",
+                  bugFixes: prow[6] || "",
+                  appTesting: prow[7] || "",
+                  assumptions: assumptionStr ? assumptionStr.split("\n") : [],
                 });
               }
-              i = j;
+              i++;
+            }
+            if (currentProject) {
+              weeklyProjects[weekName].push(currentProject);
+              currentProject = null;
             }
           } else {
             i++;
           }
         }
       }
-      // Always ensure at least Week 1 exists
       if (!weekNames.includes("Week 1")) {
         weekNames.unshift("Week 1");
         weeklyProjects["Week 1"] = [];
