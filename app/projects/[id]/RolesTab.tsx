@@ -34,14 +34,15 @@ export default function RolesTab({ projectId, currentUserId }: RolesTabProps) {
   const fetchUsersWithRoles = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/users");
+      // Pass projectId as query param so API can check project admin status
+      const res = await fetch(`/api/users?projectId=${projectId}`);
       if (res.ok) {
         const usersData = await res.json();
         // For each user, fetch their project role from the new API path
         const usersWithRoles = await Promise.all(
           usersData.map(async (user: User) => {
             const roleRes = await fetch(
-              `/api/projects/${projectId}/users/${user._id}/role`
+              `/api/projects/${projectId}/users/${user._id}/role`,
             );
             let projectRole = undefined;
             if (roleRes.ok) {
@@ -49,7 +50,7 @@ export default function RolesTab({ projectId, currentUserId }: RolesTabProps) {
               projectRole = roleData?.role || undefined;
             }
             return { ...user, projectRole };
-          })
+          }),
         );
         setUsers(usersWithRoles);
       }
@@ -71,8 +72,8 @@ export default function RolesTab({ projectId, currentUserId }: RolesTabProps) {
       if (res.ok) {
         setUsers((prev) =>
           prev.map((u) =>
-            u._id === userId ? { ...u, projectRole: newRole } : u
-          )
+            u._id === userId ? { ...u, projectRole: newRole } : u,
+          ),
         );
       } else {
         alert("Failed to update role");
