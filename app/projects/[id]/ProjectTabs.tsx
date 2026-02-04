@@ -1,4 +1,13 @@
 "use client";
+// Helper to get Excel column letter
+function getColLetter(n: number): string {
+  let s = "";
+  while (n >= 0) {
+    s = String.fromCharCode((n % 26) + 65) + s;
+    n = Math.floor(n / 26) - 1;
+  }
+  return s;
+}
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
@@ -572,118 +581,22 @@ export default function ProjectTabs({
   };
 
   const generateHourlyProjectionCSV = () => {
-    const getColLetter = (n: number) => {
-      let s = "";
-      while (n >= 0) {
-        s = String.fromCharCode((n % 26) + 65) + s;
-        n = Math.floor(n / 26) - 1;
-      }
-      return s;
-    };
-
-    // Pre-calculate row indices for week totals to use in summary table formulas
+    // --- FULL REWRITE OF SUMMARY SECTION ---
     const weekTotalRowIndices: Record<string, number> = {};
-    let excelRowCursor = 15; // Fixed rows before first week starts (Row 1-15 consumed)
-
-    weeks.forEach((weekName) => {
-      const projectLines = weeklyProjects[weekName].reduce(
-        (acc, p) => acc + p.objectives.length,
-        0,
-      );
-      const spacerLines = Math.max(0, 10 - weeklyProjects[weekName].length);
-      // Header(3) + Projects + Spacers + TotalRow(1)
-      // We want the row number of the Total Row
-      const rowsBeforeTotal = 3 + projectLines + spacerLines;
-      const totalRowIndex = excelRowCursor + rowsBeforeTotal + 1; // +1 because we are moving TO the row
-      weekTotalRowIndices[weekName] = totalRowIndex;
-
-      // Advance cursor: Header(3) + Projects + Spacers + Total(1) + BottomSpacers(2)
-      excelRowCursor += rowsBeforeTotal + 1 + 2;
-    });
-
     const csvRows: any[][] = [];
-
     // Header section
-    csvRows.push([
-      "",
-      "Vendor:",
-      hourlyForm.vendor,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
-    csvRows.push([
-      "",
-      "Month:",
-      hourlyForm.month,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
+    csvRows.push(["", "Vendor:", hourlyForm.vendor, ...Array(10).fill("")]);
+    csvRows.push(["", "Month:", hourlyForm.month, ...Array(10).fill("")]);
     csvRows.push([]);
     csvRows.push([]);
     csvRows.push([]);
 
-    // Summary section
-    // We construct formulas referencing the pre-calculated bottom total rows
-    const startWeekColIdx = 2; // Column C
-
-    const generateSummaryRow = (
-      label: string,
-      colLetter: string, // 'E', 'F', 'G', or 'H'
-      rate: string,
-      rowNum: number, // 1-based row number for this summary row
-    ) => {
-      const weekCells = weeks.map((week) => {
-        const targetRow = weekTotalRowIndices[week];
-        return `=${colLetter}${targetRow}`;
-      });
-
-      const firstWeekCol = getColLetter(startWeekColIdx);
-      const lastWeekCol = getColLetter(startWeekColIdx + weeks.length - 1);
-      const totalFormula = `=SUM(${firstWeekCol}${rowNum}:${lastWeekCol}${rowNum})`;
-
-      const rateVal = parseFloat(rate) || 0;
-      // Total Cost = Total Hours * Hourly Rate
-      // Total Hours is at column index: startWeekColIdx + weeks.length
-      // Rate is at: startWeekColIdx + weeks.length + 1
-      const totalHoursCol = getColLetter(startWeekColIdx + weeks.length);
-      const rateCol = getColLetter(startWeekColIdx + weeks.length + 1);
-      const costFormula = `=${totalHoursCol}${rowNum}*${rateCol}${rowNum}`;
-
-      return [
-        "",
-        label,
-        ...weekCells,
-        totalFormula,
-        rate,
-        costFormula,
-        "",
-        "",
-        "",
-        "",
-      ];
-    };
-
-    csvRows.push([
+    // Summary header row
+    const summaryHeader = [
       "",
       "Type",
       "Projected Hours Per Week",
-      ...weeks.map(() => ""),
+      ...weeks.map((w) => w.toUpperCase()),
       "PROJECTED TOTAL HRS",
       "Hourly ($)",
       "Total ($)",
@@ -691,84 +604,45 @@ export default function ProjectTabs({
       "",
       "",
       "",
-    ]);
-    csvRows.push([
-      "",
-      "",
-      ...weeks.map((w) => w.toUpperCase()),
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
+    ];
+    csvRows.push(summaryHeader);
 
-    // Rows 8, 9, 10, 11
-    csvRows.push(generateSummaryRow("COMMS", "E", hourlyForm.commsRate, 8));
-    csvRows.push(
-      generateSummaryRow("ENGINEERING", "F", hourlyForm.engineeringRate, 9),
-    );
-    csvRows.push(
-      generateSummaryRow("BUG FIXES", "G", hourlyForm.bugFixesRate, 10),
-    );
-    csvRows.push(
-      generateSummaryRow("APP TESTING", "H", hourlyForm.appTestingRate, 11),
-    );
+    // Summary rows for each type
+    const summaryRowIndices: number[] = [];
+    const types = ["COMMS", "ENGINEERING", "BUG FIXES", "APP TESTING"];
+    const rates = [
+      hourlyForm.commsRate,
+      hourlyForm.engineeringRate,
+      hourlyForm.bugFixesRate,
+      hourlyForm.appTestingRate,
+    ];
+    for (let i = 0; i < types.length; i++) {
+      const row = Array(13).fill("");
+      row[1] = types[i];
+      row[2] = "";
+      // Week columns (D, E, F, ...)
+      for (let w = 0; w < weeks.length; w++) {
+        row[3 + w] = ""; // will fill after week totals
+      }
+      row[3 + weeks.length] = ""; // PROJECTED TOTAL HRS
+      row[4 + weeks.length] = rates[i]; // Hourly ($)
+      row[5 + weeks.length] = ""; // Total ($)
+      csvRows.push(row);
+      summaryRowIndices.push(csvRows.length); // 1-based
+    }
 
-    csvRows.push([]);
-    csvRows.push([]);
-    csvRows.push([]);
-    csvRows.push([]);
-
-    // Weekly sections
+    // --- WEEKLY SECTIONS ---
     weeks.forEach((weekName, idx) => {
-      csvRows.push([
-        "",
-        `${weekName} - [DATE - DATE]`,
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ]);
+      csvRows.push(["", `${weekName} - [DATE - DATE]`, ...Array(11).fill("")]);
       csvRows.push([
         "",
         "Project Name",
         "Objective / Description",
         "Assumptions",
         "Type",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
-        "",
+        ...Array(8).fill(""),
       ]);
-      csvRows.push([
-        "",
-        "",
-        "",
-        "",
-        "COMMS",
-        "ENGINEERING",
-        "BUG FIXES",
-        "APP TESTING",
-        "",
-        "",
-        "",
-        "",
-        "",
-      ]);
+      csvRows.push(["", "", "", "", ...types, ...Array(4).fill("")]);
 
       let projectItemCount = 0;
       weeklyProjects[weekName].forEach((project) => {
@@ -783,11 +657,7 @@ export default function ProjectTabs({
             objective.engineering,
             objective.bugFixes,
             objective.appTesting,
-            "",
-            "",
-            "",
-            "",
-            "",
+            ...Array(5).fill(""),
           ]);
         });
       });
@@ -795,31 +665,24 @@ export default function ProjectTabs({
       // Add empty rows for spacing
       const spacerLines = Math.max(0, 10 - weeklyProjects[weekName].length);
       for (let i = 0; i < spacerLines; i++) {
-        csvRows.push(["", "", "", "", "", "", "", "", "", "", "", "", ""]);
+        csvRows.push(Array(13).fill(""));
       }
 
-      // Calculate logic for SUM range
-      // Total Row Index is weekTotalRowIndices[weekName]
-      // Range ends at totalRowIdx - 1
-      // Range starts at totalRowIdx - spacerLines - projectItemCount
-      const totalRowIdx = weekTotalRowIndices[weekName];
-      // Range ends at totalRowIdx - 1
-      // Range starts at totalRowIdx - spacerLines - projectItemCount
+      // Calculate SUM ranges for week totals
+      const totalRowIdx = csvRows.length + 1;
+      weekTotalRowIndices[weekName] = totalRowIdx;
       const endRow = totalRowIdx - 1;
       const startRow = totalRowIdx - spacerLines - projectItemCount;
-
-      // Column letters for each type
+      // Columns for each type
       const commsCol = getColLetter(4); // E
       const engCol = getColLetter(5); // F
       const bugCol = getColLetter(6); // G
       const appCol = getColLetter(7); // H
-
-      // Use correct Excel range syntax: E19:E29
+      // SUM formulas
       const commsSum = `=SUM(${commsCol}${startRow}:${commsCol}${endRow})`;
       const engSum = `=SUM(${engCol}${startRow}:${engCol}${endRow})`;
       const bugSum = `=SUM(${bugCol}${startRow}:${bugCol}${endRow})`;
       const appSum = `=SUM(${appCol}${startRow}:${appCol}${endRow})`;
-
       csvRows.push([
         "",
         "",
@@ -829,68 +692,52 @@ export default function ProjectTabs({
         engSum,
         bugSum,
         appSum,
-        "",
-        "",
-        "",
-        "",
-        "",
+        ...Array(5).fill(""),
       ]);
     });
 
-    // Bottom Totals
-    const summaryTotalCol = getColLetter(2 + weeks.length);
+    // --- FILL SUMMARY ROWS WITH WEEK TOTALS AND FORMULAS ---
+    const startWeekColIdx = 3; // Column D
+    for (let i = 0; i < types.length; i++) {
+      const colLetter = getColLetter(4 + i); // E, F, G, H
+      const summaryRowIdx = summaryRowIndices[i];
+      // Fill week cells
+      for (let w = 0; w < weeks.length; w++) {
+        csvRows[summaryRowIdx - 1][3 + w] =
+          `=${colLetter}${weekTotalRowIndices[weeks[w]]}`;
+      }
+      // PROJECTED TOTAL HRS formula
+      const firstWeekCol = getColLetter(startWeekColIdx);
+      const lastWeekCol = getColLetter(startWeekColIdx + weeks.length - 1);
+      csvRows[summaryRowIdx - 1][3 + weeks.length] =
+        `=SUM(${firstWeekCol}${summaryRowIdx}:${lastWeekCol}${summaryRowIdx})`;
+      // Total ($) formula
+      const totalHoursCol = getColLetter(3 + weeks.length);
+      const rateCol = getColLetter(4 + weeks.length);
+      csvRows[summaryRowIdx - 1][5 + weeks.length] =
+        `=${totalHoursCol}${summaryRowIdx}*${rateCol}${summaryRowIdx}`;
+    }
 
+    // --- BOTTOM TOTALS ---
     csvRows.push([
       "",
       "",
       "",
       "Projected Monthly Hour Totals:",
-      `=${summaryTotalCol}8`, // Comms
-      `=${summaryTotalCol}9`, // Eng
-      `=${summaryTotalCol}10`, // Bug
-      `=${summaryTotalCol}11`, // App
-      "",
-      "",
-      "",
-      "",
+      ...types.map(
+        (_, i) => `=${getColLetter(3 + weeks.length)}${summaryRowIndices[i]}`,
+      ),
+      ...Array(5).fill(""),
     ]);
     csvRows.push([]);
     csvRows.push([]);
     csvRows.push([]);
 
     // Assumptions
-    csvRows.push([
-      "",
-      "Assumptions",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-    ]);
+    csvRows.push(["", "Assumptions", ...Array(11).fill("")]);
     assumptions.forEach((assumption) => {
       if (assumption.trim()) {
-        csvRows.push([
-          "",
-          assumption,
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-          "",
-        ]);
+        csvRows.push(["", assumption, ...Array(11).fill("")]);
       }
     });
 
@@ -1349,22 +1196,36 @@ export default function ProjectTabs({
   function evaluateFormula(cell: string, row: any[], allRows: any[][]): any {
     if (typeof cell !== "string" || !cell.startsWith("=")) return cell;
     try {
-      // =SUM(A1:A2)
+      // =SUM(A1:A2) or =SUM(A1:D1) (vertical or horizontal range)
       if (/^=SUM\(([A-Z]+)(\d+):([A-Z]+)(\d+)\)$/.test(cell)) {
         const match = cell.match(/^=SUM\(([A-Z]+)(\d+):([A-Z]+)(\d+)\)$/);
         if (!match) return cell;
         const [, col1, row1, col2, row2] = match;
-        const colIdx = col1.charCodeAt(0) - 65;
-        const start = parseInt(row1, 10) - 1;
-        const end = parseInt(row2, 10) - 1;
+        const startColIdx = col1.charCodeAt(0) - 65;
+        const endColIdx = col2.charCodeAt(0) - 65;
+        const startRowIdx = parseInt(row1, 10) - 1;
+        const endRowIdx = parseInt(row2, 10) - 1;
         let sum = 0;
-        for (let i = start; i <= end; i++) {
-          const v = allRows[i]?.[colIdx];
-          const n =
-            typeof v === "string" && v.startsWith("=")
-              ? evaluateFormula(v, allRows[i], allRows)
-              : v;
-          sum += parseFloat(n) || 0;
+        // If same row, sum across columns (horizontal)
+        if (startRowIdx === endRowIdx) {
+          for (let c = startColIdx; c <= endColIdx; c++) {
+            let v = allRows[startRowIdx]?.[c];
+            // Recursively evaluate formulas in referenced cells
+            while (typeof v === "string" && v.startsWith("=")) {
+              v = evaluateFormula(v, allRows[startRowIdx], allRows);
+            }
+            sum += parseFloat(v) || 0;
+          }
+        } else if (startColIdx === endColIdx) {
+          // If same column, sum down rows (vertical)
+          for (let r = startRowIdx; r <= endRowIdx; r++) {
+            let v = allRows[r]?.[startColIdx];
+            // Recursively evaluate formulas in referenced cells
+            while (typeof v === "string" && v.startsWith("=")) {
+              v = evaluateFormula(v, allRows[r], allRows);
+            }
+            sum += parseFloat(v) || 0;
+          }
         }
         return sum;
       }
