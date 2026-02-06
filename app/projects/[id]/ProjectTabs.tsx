@@ -625,8 +625,21 @@ export default function ProjectTabs({
         row[3 + w] = ""; // will fill after week totals
       }
       row[3 + weeks.length] = ""; // PROJECTED TOTAL HRS
-      row[4 + weeks.length] = rates[i]; // Hourly ($)
-      row[5 + weeks.length] = ""; // Total ($)
+      // Only show rate if provided, else blank
+      let rateVal = rates[i];
+      // Only show if it's a non-empty, non-zero, positive number
+      if (
+        rateVal === undefined ||
+        rateVal === null ||
+        rateVal.toString().trim() === "" ||
+        isNaN(Number(rateVal)) ||
+        Number(rateVal) <= 0
+      ) {
+        rateVal = "";
+      }
+      row[4 + weeks.length] = rateVal; // Hourly ($)
+      // Only show formula for Total ($) if rate is provided
+      row[5 + weeks.length] = rateVal ? "=FILLFORMULA" : ""; // placeholder for formula
       csvRows.push(row);
       summaryRowIndices.push(csvRows.length); // 1-based
     }
@@ -711,11 +724,16 @@ export default function ProjectTabs({
       const lastWeekCol = getColLetter(startWeekColIdx + weeks.length - 1);
       csvRows[summaryRowIdx - 1][3 + weeks.length] =
         `=SUM(${firstWeekCol}${summaryRowIdx}:${lastWeekCol}${summaryRowIdx})`;
-      // Total ($) formula
+      // Only fill Total ($) formula if rate is provided
       const totalHoursCol = getColLetter(3 + weeks.length);
       const rateCol = getColLetter(4 + weeks.length);
-      csvRows[summaryRowIdx - 1][5 + weeks.length] =
-        `=${totalHoursCol}${summaryRowIdx}*${rateCol}${summaryRowIdx}`;
+      const rateCell = csvRows[summaryRowIdx - 1][4 + weeks.length];
+      if (rateCell && rateCell.toString().trim() !== "") {
+        csvRows[summaryRowIdx - 1][5 + weeks.length] =
+          `=${totalHoursCol}${summaryRowIdx}*${rateCol}${summaryRowIdx}`;
+      } else {
+        csvRows[summaryRowIdx - 1][5 + weeks.length] = "";
+      }
     }
 
     // --- BOTTOM TOTALS ---
