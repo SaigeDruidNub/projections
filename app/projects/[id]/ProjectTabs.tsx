@@ -1027,51 +1027,54 @@ export default function ProjectTabs({
       // Parse vendor and month
       const vendor = parsed[0]?.[2] || "";
       const month = parsed[1]?.[2] || "";
-      // Parse rates: search for the row with 'Hourly Rates' and grab the next 4 rows
+
+      // Find the summary header row (should contain "Hourly ($)")
+      const summaryHeaderIdx = parsed.findIndex(
+        (row: any[]) =>
+          row &&
+          row.some(
+            (cell: any) =>
+              typeof cell === "string" && cell.includes("Hourly ($)"),
+          ),
+      );
       let commsRate = "";
       let engineeringRate = "";
       let bugFixesRate = "";
       let appTestingRate = "";
-      for (let r = 0; r < parsed.length; r++) {
-        if (
-          parsed[r][1] &&
-          typeof parsed[r][1] === "string" &&
-          parsed[r][1].toLowerCase().includes("hourly rates")
-        ) {
-          commsRate = parsed[r + 1]?.[5]?.toString() || "";
-          engineeringRate = parsed[r + 2]?.[5]?.toString() || "";
-          bugFixesRate = parsed[r + 3]?.[5]?.toString() || "";
-          appTestingRate = parsed[r + 4]?.[5]?.toString() || "";
-          break;
+      if (summaryHeaderIdx !== -1) {
+        // The summary rows are the next 4 rows after the header
+        const summaryRows = parsed.slice(
+          summaryHeaderIdx + 1,
+          summaryHeaderIdx + 5,
+        );
+        // Find the index of the "Hourly ($)" column
+        const hourlyColIdx = parsed[summaryHeaderIdx].findIndex(
+          (cell: any) =>
+            typeof cell === "string" && cell.includes("Hourly ($)"),
+        );
+        for (const row of summaryRows) {
+          if (!row) continue;
+          const type = (row[1] || row[0] || "").toString().toUpperCase();
+          if (type.includes("COMMS"))
+            commsRate = row[hourlyColIdx]?.toString() || "";
+          if (type.includes("ENGINEERING"))
+            engineeringRate = row[hourlyColIdx]?.toString() || "";
+          if (type.includes("BUG"))
+            bugFixesRate = row[hourlyColIdx]?.toString() || "";
+          if (type.includes("APP TEST"))
+            appTestingRate = row[hourlyColIdx]?.toString() || "";
         }
       }
-      if (!commsRate && parsed[8]?.[5]) commsRate = parsed[8][5].toString();
-      if (!engineeringRate && parsed[9]?.[5])
-        engineeringRate = parsed[9][5].toString();
-      if (!bugFixesRate && parsed[10]?.[5])
-        bugFixesRate = parsed[10][5].toString();
-      if (!appTestingRate && parsed[11]?.[5])
-        appTestingRate = parsed[11][5].toString();
 
       // Parse isOverage from name or field
       const isOverage = proj.isOverage || /overage/i.test(proj.name);
       setHourlyForm({
         vendor,
         month,
-        commsRate:
-          commsRate !== undefined && commsRate !== null ? commsRate : "",
-        engineeringRate:
-          engineeringRate !== undefined && engineeringRate !== null
-            ? engineeringRate
-            : "",
-        bugFixesRate:
-          bugFixesRate !== undefined && bugFixesRate !== null
-            ? bugFixesRate
-            : "",
-        appTestingRate:
-          appTestingRate !== undefined && appTestingRate !== null
-            ? appTestingRate
-            : "",
+        commsRate: commsRate ?? "",
+        engineeringRate: engineeringRate ?? "",
+        bugFixesRate: bugFixesRate ?? "",
+        appTestingRate: appTestingRate ?? "",
         isOverage,
       });
 

@@ -6,7 +6,7 @@ import { User } from "@/lib/models";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
     const session = await auth();
@@ -16,18 +16,28 @@ export async function PATCH(
 
     await dbConnect();
 
-    // Only allow admins to change roles (or project owner, if you want to add that logic)
-    const currentUser = await User.findById(session.user.id);
-    if (!currentUser?.isAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const { projectId, role } = await req.json();
     if (!projectId || !role) {
       return NextResponse.json(
         { error: "Project and role required" },
-        { status: 400 }
+        { status: 400 },
       );
+    }
+
+    // Allow global admins and project admins to change project roles.
+    const currentUser = await User.findById(session.user.id);
+    let isProjectAdmin = false;
+
+    if (!currentUser?.isAdmin) {
+      const currentProjectUser = await ProjectUser.findOne({
+        projectId,
+        userId: session.user.id,
+      });
+      isProjectAdmin = currentProjectUser?.role === "admin";
+    }
+
+    if (!currentUser?.isAdmin && !isProjectAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { userId } = await params;
@@ -36,7 +46,7 @@ export async function PATCH(
     const projectUser = await ProjectUser.findOneAndUpdate(
       { userId, projectId },
       { role },
-      { new: true, upsert: true, setDefaultsOnInsert: true }
+      { new: true, upsert: true, setDefaultsOnInsert: true },
     );
 
     return NextResponse.json(projectUser);
@@ -44,14 +54,14 @@ export async function PATCH(
     console.error("Error updating project user role:", error);
     return NextResponse.json(
       { error: "Failed to update project user role" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ userId: string }> }
+  { params }: { params: Promise<{ userId: string }> },
 ) {
   try {
     const { searchParams } = new URL(req.url);
@@ -69,7 +79,7 @@ export async function GET(
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch project user role" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
